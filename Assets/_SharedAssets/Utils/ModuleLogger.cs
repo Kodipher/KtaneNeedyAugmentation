@@ -45,12 +45,12 @@ namespace SharedAssets.Utils {
 
 			// Number-less tag
 			if (!forcedInstanceIndex.HasValue) {
-				tag = CreateLogTagNumberless(displayName);
+				tag = $"[{displayName}]";
 				return;
 			}
 
 			// Create log tag
-			tag = CreateLogTag(displayName, forcedInstanceIndex.Value);
+			tag = $"[{displayName} #{forcedInstanceIndex}]";
 
 			// Autoprint something
 			#if MODULELOGGER_AUTOPRINT_HELLOWORLD
@@ -61,14 +61,6 @@ namespace SharedAssets.Utils {
 
 		/// <summary>Log tag that is used to identify the module in the logfile.</summary>
 		readonly string tag;
-
-		static string CreateLogTag(string moduleDisplayName, int moduleInstanceIndex) {
-			return $"[{moduleDisplayName} #{moduleInstanceIndex}]";
-		}
-
-		static string CreateLogTagNumberless(string moduleDisplayName) {
-			return $"[{moduleDisplayName}]";
-		}
 
 		#endregion
 
