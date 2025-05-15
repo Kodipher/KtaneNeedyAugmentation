@@ -10,5 +10,6 @@ Created using:
 # Template Filling Checklist:
 - Add missing fields in the `LICENSE`
 - Rename the section above in `README`
-- Rename `_ModuleNameMod` folder
+- Configure Mod (in the ModKit menu)
+- Rename `_TemplateMod` folder
 - Remove this section in `README`
