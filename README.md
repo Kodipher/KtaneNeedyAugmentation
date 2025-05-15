@@ -12,4 +12,7 @@ Created using:
 - Rename the section above in `README`
 - Configure Mod (in the ModKit menu)
 - Rename `_TemplateMod` folder
+- Rename `TemplateMod` namespace, the prefab and classes inside the scripts in said namespace
+- Attach the `GNS` script to the prefab
+- Generate `.meta` files for stuff in the mod directory
 - Remove this section in `README`
