@@ -110,7 +110,7 @@ namespace SharedAssets.Utils {
 		#region //// Logging
 
 		const char lineChar = '═';
-		const int lineLength = 15;
+		const int lineLength = 5;
 
 		public void LogString(string str) {
 			Debug.Log($"{tag} {str}");
