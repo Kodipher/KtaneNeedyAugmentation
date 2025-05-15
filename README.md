@@ -14,6 +14,6 @@ Created using:
 - Rename `_TemplateMod` folder
 - Rename `TemplateMod` namespace, the prefab and classes inside the scripts in said namespace
 - Attach the `GNS` script to the prefab
-- Generate `.meta` files for stuff in the mod directory
+- Generate `.meta` files for stuff in the mod directory (remove local gitignore)
 - Add module prefab to `mod.bundle`
 - Remove this section in `README`
