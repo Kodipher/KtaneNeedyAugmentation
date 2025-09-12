@@ -43,14 +43,14 @@ namespace SharedAssets.Utils {
 		/// </param>
 		public ModuleLogger(string displayName, int? forcedInstanceIndex) {
 
-			// Number-less tag
-			if (!forcedInstanceIndex.HasValue) {
-				tag = $"[{displayName}]";
-				return;
-			}
-
 			// Create log tag
-			tag = $"[{displayName} #{forcedInstanceIndex}]";
+			tagId = forcedInstanceIndex;
+
+			if (forcedInstanceIndex.HasValue) {
+				tag = $"[{moduleDisplayName} #{moduleInstanceIndex}]";
+			} else {
+				tag = $"[{moduleDisplayName}]";
+			}
 
 			// Autoprint something
 			#if MODULELOGGER_AUTOPRINT_HELLOWORLD
@@ -58,6 +58,12 @@ namespace SharedAssets.Utils {
 			LogLine();
 			#endif
 		}
+
+		/// <summary>
+		/// The numeric id used in the <see cref="tag"/> 
+		/// or <see langword="null"/> for no numeric id.
+		/// </summary>
+		public readonly int? tagId;
 
 		/// <summary>Log tag that is used to identify the module in the logfile.</summary>
 		readonly string tag;
@@ -125,7 +131,7 @@ namespace SharedAssets.Utils {
 		}
 
 		public void LogException(System.Exception ex) {
-			Debug.LogWarning($"{tag} An exception has occured. See below.");
+			Debug.LogWarning($"{tag} An exception has occured. See in Filtered Log.");
 			Debug.LogException(ex);
 		}
 
