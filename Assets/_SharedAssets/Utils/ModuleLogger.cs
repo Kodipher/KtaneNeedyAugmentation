@@ -47,9 +47,9 @@ namespace SharedAssets.Utils {
 			tagId = forcedInstanceIndex;
 
 			if (forcedInstanceIndex.HasValue) {
-				tag = $"[{moduleDisplayName} #{moduleInstanceIndex}]";
+				tag = $"[{displayName} #{forcedInstanceIndex}]";
 			} else {
-				tag = $"[{moduleDisplayName}]";
+				tag = $"[{displayName}]";
 			}
 
 			// Autoprint something
