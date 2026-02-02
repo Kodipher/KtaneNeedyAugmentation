@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace SharedAssets.Utils {
 
-	public static class StringExtentions {
+	public static class StringExtensions {
 
 		static readonly Regex regexContainsEnglishLetters = new Regex(@"[a-zA-Z]");
 
@@ -13,7 +13,7 @@ namespace SharedAssets.Utils {
 			return regexContainsEnglishLetters.IsMatch(str);
 		}
 
-		internal static readonly Regex regexFindColorTags = new Regex(@"<(?<close>\/)?color(?(close)|=(?<color>[^>]*))?>", RegexOptions.IgnoreCase);
+		internal static readonly Regex RegexFindColorTags = new Regex(@"<(?<close>\/)?color(?(close)|=(?<color>[^>]*))?>", RegexOptions.IgnoreCase);
 
 		/// <summary>Removes color tags from the string</summary>
 		/// <returns>A string without color tags</returns>
@@ -23,7 +23,7 @@ namespace SharedAssets.Utils {
 			int copyStartI = 0;
 
 			// For all individual color tags
-			foreach (Match match in regexFindColorTags.Matches(str)) {
+			foreach (Match match in RegexFindColorTags.Matches(str)) {
 				// Copy until tag
 				stringBuilder.Append(str, copyStartI, match.Index - copyStartI);
 				// Skip the tag itself
@@ -39,13 +39,13 @@ namespace SharedAssets.Utils {
 
 
 		/// <summary>No-Break space character</summary>
-		public const char nbsp = '\u00A0';
+		public const char Nbsp = '\u00A0';
 
 		/// <summary>
 		/// Returns given string with underscores replaced by nbsp (no-break space)
 		/// </summary>
 		public static string UnderscoreToNoBreakSpace(this string str) {
-			return str.Replace('_', nbsp);
+			return str.Replace('_', Nbsp);
 		}
 
 		/// <summary>Returns the number of english vowels in the string.</summary>

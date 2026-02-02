@@ -131,7 +131,7 @@ namespace SharedAssets.Utils.Collections {
 			Stack<Color?> colorStack = new Stack<Color?>();
 
 			// Get all color changes
-			foreach (Match match in StringExtentions.regexFindColorTags.Matches(str)) {
+			foreach (Match match in StringExtensions.RegexFindColorTags.Matches(str)) {
 
 				// Fill until tag
 				for (int i = match.Index - strChars; i > 0; i--) {
