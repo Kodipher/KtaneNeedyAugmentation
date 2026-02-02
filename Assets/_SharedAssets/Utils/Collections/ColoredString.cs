@@ -61,7 +61,7 @@ namespace SharedAssets.Utils.Collections {
 			}
 		}
 
-		/// <summary>Replces all null-colors with a color</summary>
+		/// <summary>Replaces all null-colors with a color</summary>
 		public void ReplaceNullColor(Color color) {
 			for (int i = 0; i < Length; i++) {
 				if (!colors[i].HasValue) colors[i] = color;
@@ -170,8 +170,8 @@ namespace SharedAssets.Utils.Collections {
 			// After all tags
 			if (colorStack.Count > 0) return new ColoredString(str, null); //invalid tag placement => bail
 
-			// Copy reaminging chars
-			for (; retChars < ret.Length; retChars++) {
+			// Copy remaining chars
+			for (/* [nop] */; retChars < ret.Length; retChars++) {
 				ret.colors[retChars] = null;
 			}
 
@@ -185,7 +185,7 @@ namespace SharedAssets.Utils.Collections {
 		public override string ToString() => new string(text);
 
 		/// <summary>
-		/// Translates a colored string into a string with color tags.
+		/// Converts a colored string into a string with color tags.
 		/// </summary>
 		/// <returns>String with color tags</returns>
 		public static string ToRichString(char[] text, Color?[] colors) {

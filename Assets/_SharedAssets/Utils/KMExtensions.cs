@@ -41,7 +41,7 @@ namespace SharedAssets.Utils {
 
 		/// <summary>
 		/// Returns centiseconds digits displayed on the bomb's timer,
-		/// or <see langword="null"/> if they are not dispalyed.
+		/// or <see langword="null"/> if they are not displayed.
 		/// </summary>
 		public static int? GetTimerCentisecondsDisplay(this KMBombInfo bombInfo) {
 

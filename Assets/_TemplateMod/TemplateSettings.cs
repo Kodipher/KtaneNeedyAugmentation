@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 namespace TemplateMod {
 
 	/// <summary>
-	/// Contains user configuarion of this mod.
+	/// Contains user configuration of this mod.
 	/// Mutable but not global.
 	/// </summary>
 	public /*record*/ class TemplateSettings : SharedAssets.Utils.IVersioned {

@@ -8,9 +8,7 @@ namespace SharedAssets.Utils {
 
 		static readonly Regex regexContainsEnglishLetters = new Regex(@"[a-zA-Z]");
 
-		/// <summary>
-		/// Check if a sting contains letters (a through z)
-		/// </summary>
+		/// <summary>Check if a sting contains letters (a through z)</summary>
 		public static bool ContainsModernEnglishLetters(this string str) {
 			return regexContainsEnglishLetters.IsMatch(str);
 		}
@@ -32,7 +30,7 @@ namespace SharedAssets.Utils {
 				copyStartI = match.Index + match.Length;
 			}
 
-			// Copy reaminging chars
+			// Copy remaining chars
 			stringBuilder.Append(str, copyStartI, str.Length - copyStartI);
 
 			// Return

@@ -5,7 +5,7 @@ using Color = UnityEngine.Color;
 namespace SharedAssets.Utils {
 
 	/// <summary>
-	/// Holds a range (0..1) of hues, saturations and brightnessees.
+	/// Holds a range (0..1) of hue, saturation and brightness values.
 	/// Can be used with <see cref="System.Random"/> to pick a random color.
 	/// </summary>
 	public class ColorRange {

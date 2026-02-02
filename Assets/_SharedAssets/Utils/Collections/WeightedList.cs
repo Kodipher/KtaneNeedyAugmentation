@@ -154,7 +154,7 @@ namespace SharedAssets.Utils.Collections {
 
 			// Guards
 			if (WeightsTotal <= 0 || Count < 1) {
-				throw new ArgumentException("Cannot pick items from a weigthed storage equivalent to empty");
+				throw new ArgumentException("Cannot pick items from a weighted storage equivalent to empty");
 			}
 
 			// Pick

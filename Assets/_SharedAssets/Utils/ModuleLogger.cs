@@ -8,7 +8,7 @@ using UnityEngine;
 namespace SharedAssets.Utils {
 
 	/// <summary>
-	/// A class that is designed to log stuff in a propper format for the Log File Analyser.
+	/// A class that is designed to log stuff in a propper format for the Log File Analyzer.
 	/// Also performs instance counting per given name (<see langword="static"/>ly).
 	/// Should be created one time per module instance due to counting.
 	/// </summary>
@@ -27,11 +27,11 @@ namespace SharedAssets.Utils {
 		}
 
 		/// <inheritdoc cref="ModuleLogger"/>
-		/// <param name="moduleDisplayName">Name that appears in the log and that is used to count instances</param>
-		public ModuleLogger(string moduleDisplayName) : this(moduleDisplayName, CountNext(moduleDisplayName)) {
+		/// <param name="displayName">Name that appears in the log and that is used to count instances</param>
+		public ModuleLogger(string displayName) : this(displayName, CountNext(displayName)) {
 		}
 
-		/// <inheritdoc cref="ModuleLogger.ModuleLogger(string)"/>
+		/// <inheritdoc cref="ModuleLogger(string)"/>
 		/// <param name="forcedInstanceIndex">
 		/// <para>
 		/// Forced index in the tag. <see langword="null"/> can be provided to 
@@ -115,8 +115,8 @@ namespace SharedAssets.Utils {
 
 		#region //// Logging
 
-		const char lineChar = '═';
-		const int lineLength = 5;
+		const char LineChar = '═';
+		const int LineLength = 5;
 
 		public void LogString(string str) {
 			Debug.Log($"{tag} {str}");
@@ -140,7 +140,7 @@ namespace SharedAssets.Utils {
 		}
 
 		public void LogLine() {
-			LogString(new string(lineChar, lineLength));
+			LogString(new string(LineChar, LineLength));
 		}
 
 		#endregion
