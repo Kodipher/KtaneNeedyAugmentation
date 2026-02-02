@@ -25,7 +25,7 @@ namespace TemplateMod {
 		State state;
 
 		// Expose log id for LFA at module instance (required by Tweaks)
-		public int LogFileAnalyzerId => this.logger.tagId.Value;
+		public int LogFileAnalyzerId => this.logger.tagId ?? 0;
 
 		#endregion
 
