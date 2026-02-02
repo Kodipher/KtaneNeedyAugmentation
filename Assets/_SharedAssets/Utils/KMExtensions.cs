@@ -11,7 +11,7 @@ namespace SharedAssets.Utils {
 
 		/// <summary>Returns <see langword="true"/> if the bomb's serial number contains a vowel</summary>
 		public static bool SerialContainsVowel(this KMBombInfo bombInfo, bool includeY = false) {
-			IEnumerable<char> letters = bombInfo.GetSerialNumberLetters().Select(char.ToUpperInvariant);
+			char[] letters = bombInfo.GetSerialNumberLetters().Select(char.ToUpperInvariant).ToArray();
 			if (includeY && letters.Contains('Y')) return true;
 			return letters.Any(x => vowels.Contains(x));
 		}
