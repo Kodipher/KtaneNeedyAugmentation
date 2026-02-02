@@ -104,7 +104,8 @@ namespace SharedAssets.Utils {
 		public static int CountCurrent(string name) {
 			lock (counterLock) {
 				// Known name
-				if (instanceCounts.ContainsKey(name)) return instanceCounts[name];
+				int current;
+				if (instanceCounts.TryGetValue(name, out current)) return current;
 
 				// New name
 				return 0;
