@@ -20,7 +20,7 @@ namespace SharedAssets.Utils.Collections {
 	/// </summary>
 	public class ColoredString : IEnumerable<Pair<char, Color?>>, IEquatable<ColoredString>, ICloneable {
 
-		#region //// Storage
+		#region /--- Storage ---/
 
 		protected readonly char[] text;
 		protected readonly Color?[] colors;
@@ -70,7 +70,7 @@ namespace SharedAssets.Utils.Collections {
 
 		#endregion
 
-		#region //// Creation
+		#region /--- Creation ---/
 
 		/// <summary>Creates an empty colored string.</summary>
 		public ColoredString() {
@@ -180,7 +180,7 @@ namespace SharedAssets.Utils.Collections {
 
 		#endregion
 
-		#region //// Getters and interfaces
+		#region /--- ToString, Interface implementations ---/
 
 		public override string ToString() => new string(text);
 

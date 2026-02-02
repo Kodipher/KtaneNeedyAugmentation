@@ -14,7 +14,7 @@ namespace SharedAssets.Utils {
 	/// </summary>
 	public class ModuleLogger {
 
-		#region //// Constructor, Tag
+		#region /--- Constructor, Tag ---/
 
 		/// <inheritdoc cref="ModuleLogger"/>
 		/// <param name="moduleComponent">The module component to grab display name from.</param>
@@ -70,7 +70,7 @@ namespace SharedAssets.Utils {
 
 		#endregion
 
-		#region //// (static) Instance counting
+		#region /--- (static) Instance counting ---/
 
 		private static readonly object counterLock = new object();
 
@@ -113,7 +113,7 @@ namespace SharedAssets.Utils {
 
 		#endregion
 
-		#region //// Logging
+		#region /--- Logging ---/
 
 		const char LineChar = '═';
 		const int LineLength = 5;

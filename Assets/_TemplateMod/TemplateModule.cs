@@ -17,7 +17,7 @@ namespace TemplateMod {
 	[RequireComponent(typeof(KMAudio))]
 	public class TemplateModule : MonoBehaviour {
 
-		#region //// State
+		#region /--- State ---/
 
 		private enum State {
 		}
@@ -29,7 +29,7 @@ namespace TemplateMod {
 
 		#endregion
 
-		#region //// Components and parts
+		#region /--- Components and parts ---/
 
 		// Created 
 		internal KMBombModule kmModule;
@@ -60,7 +60,7 @@ namespace TemplateMod {
 
 		#endregion
 
-		#region //// Events
+		#region /--- Events ---/
 
 		void Start() {
 
@@ -82,7 +82,7 @@ namespace TemplateMod {
 
 		#endregion
 
-		#region //// Routines
+		#region /--- Routines ---/
 
 		IEnumerable<CoroutineYield> TemplateRoutine() {
 			yield break;

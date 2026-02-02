@@ -48,17 +48,11 @@ namespace SharedAssets.Utils.Collections {
 
 	/// <summary>A list of weighted items.</summary>
 	public class WeightedList<T> : IEnumerable<WeightedItem<T>>, IList<WeightedItem<T>> {
-
-		#region //// Storage
-
+		
 		readonly List<WeightedItem<T>> items;
 		public int WeightsTotal { get; private set; }
 		public int Count => items.Count;
-
-		#endregion
-
-		#region //// Creation
-
+		
 		public WeightedList() {
 			items = new List<WeightedItem<T>>();
 			WeightsTotal = 0;
@@ -81,9 +75,7 @@ namespace SharedAssets.Utils.Collections {
 			}
 		}
 
-		#endregion
-
-		#region //// List stuff
+		#region /--- List stuff ---/
 
 		public WeightedItem<T> this[int index] {
 			get { return items[index]; }
@@ -148,8 +140,6 @@ namespace SharedAssets.Utils.Collections {
 
 		#endregion
 
-		#region //// Random picker
-
 		public T Pick(Random rng) {
 
 			// Guards
@@ -168,8 +158,6 @@ namespace SharedAssets.Utils.Collections {
 			// [unreachable]
 			throw new InvalidOperationException("Something went wrong. This should not be ever thrown.");
 		}
-
-		#endregion
 
 	}
 
