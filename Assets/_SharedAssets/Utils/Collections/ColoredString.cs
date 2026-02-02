@@ -40,15 +40,12 @@ namespace SharedAssets.Utils.Collections {
 
 			if (ignoreAlpha && color.HasValue) {
 
-				// Fill non-null color with ignoring alpha
+				Color cValue = color.Value;
+				
+				// Fill with ignoring alpha
 				for (int i = 0; i < Length; i++) {
 
-					Color cValue = color.Value;
-
-					// Get old alpha
 					float oldAlpha = colors[i].HasValue ? colors[i].Value.a : nullAlpha;
-					
-					// Replace color
 					colors[i] = new Color(cValue.r, cValue.g, cValue.b, oldAlpha);
 				}
 
@@ -74,8 +71,8 @@ namespace SharedAssets.Utils.Collections {
 
 		/// <summary>Creates an empty colored string.</summary>
 		public ColoredString() {
-			text = new char[0];
-			colors = new Color?[0];
+			text = Array.Empty<char>();
+			colors = Array.Empty<Color?>();
 		}
 
 		/// <summary>Creates an empty colored of specified length filled with nulls.</summary>
