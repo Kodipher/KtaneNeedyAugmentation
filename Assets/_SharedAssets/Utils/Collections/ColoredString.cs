@@ -40,15 +40,11 @@ namespace SharedAssets.Utils.Collections {
 
 			if (ignoreAlpha && color.HasValue) {
 
+				Color cValue = color.Value;
+				
 				// Fill non-null color with ignoring alpha
 				for (int i = 0; i < Length; i++) {
-
-					Color cValue = color.Value;
-
-					// Get old alpha
 					float oldAlpha = colors[i].HasValue ? colors[i].Value.a : nullAlpha;
-					
-					// Replace color
 					colors[i] = new Color(cValue.r, cValue.g, cValue.b, oldAlpha);
 				}
 
