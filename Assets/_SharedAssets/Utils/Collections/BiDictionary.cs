@@ -72,6 +72,10 @@ namespace SharedAssets.Utils.Collections {
 
 		public int Count => _dictionary.Count;
 
+		public bool TryGetValue(UKey key, out UValue value) {
+			return _dictionary.TryGetValue(key, out value);
+		}
+
 		public IEnumerator<KeyValuePair<UKey, UValue>> GetEnumerator() {
 			return _dictionary.GetEnumerator();
 		}
