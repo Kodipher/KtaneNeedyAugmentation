@@ -20,9 +20,11 @@ namespace TemplateMod {
 		#region /--- State ---/
 
 		private enum State {
+			Initiating,
+			Solved
 		}
 
-		State state;
+		State state = State.Initiating;
 
 		// Expose log id for LFA at module instance (required by Tweaks)
 		public int LogFileAnalyzerId => this.logger.tagId ?? 0;
@@ -88,6 +90,15 @@ namespace TemplateMod {
 
 		void OnDestroy() {
 			animationRunner?.Dispose();
+		}
+		
+		public void TwitchHandleForcedSolve() {
+			logger.LogString("Forced solve command received. Ending routines.");
+			animationRunner.Clear();
+			
+			state = State.Solved;
+			kmModule.HandlePass();
+			logger.LogString("Module solved.");
 		}
 
 		#endregion
