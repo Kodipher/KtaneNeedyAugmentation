@@ -21,7 +21,7 @@ namespace TemplateMod {
 			
 			new Dictionary<string, object>() {
 				{ "Filename", $"{nameof(TemplateSettings)}.json" },
-				{ "Name", "Template" },
+				{ "Name", nameof(TemplateSettings) },
 				{ "Listings", new List<Dictionary<string, object>> 
 					{
 						new Dictionary<string, object> { { "Key", nameof(TemplateSettings.Version) }, { "Type", "Hidden" } },
