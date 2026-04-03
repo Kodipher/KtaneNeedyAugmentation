@@ -31,11 +31,12 @@ namespace TemplateMod {
 
 		#region /--- Components and parts ---/
 
-		// Created 
+		// KM
 		internal KMBombModule kmModule;
 		internal KMBombInfo kmBomb;
 		internal KMAudio kmAudio;
 
+		// Created 
 		internal System.Random rng;
 		internal ModuleLogger logger;
 		internal AnimationRunner animationRunner;
