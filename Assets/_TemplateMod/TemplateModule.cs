@@ -74,7 +74,16 @@ namespace TemplateMod {
 		}
 
 		void Update() {
-			animationRunner?.Update(TimeSpan.FromSeconds(Time.deltaTime));
+			try {
+				animationRunner?.Update(TimeSpan.FromSeconds(Time.deltaTime));
+			} catch (System.Exception ex) {
+				// ReSharper disable Unity.PerformanceCriticalCodeInvocation
+				logger.LogString("Exception from AnimationRunner.");
+				logger.LogException(ex);
+				// ReSharper restore Unity.PerformanceCriticalCodeInvocation
+				animationRunner?.Clear();
+				throw;
+			}
 		}
 
 		void OnDestroy() {
