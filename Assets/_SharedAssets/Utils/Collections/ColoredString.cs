@@ -13,10 +13,16 @@ using ColorUtility = UnityEngine.ColorUtility;
 namespace SharedAssets.Utils.Collections {
 
 	/// <summary>
+	/// <para>
 	/// A string with a color assigned to each character.
+	/// </para>
+	/// <para>
 	/// A color can be <see langword="null"/>, meaning that character 
 	/// would be outside of any color tags when converted to a unity rich text string.
-	/// Is mutable.
+	/// </para>
+	/// <para>
+	/// Mutable.
+	/// </para>
 	/// </summary>
 	public class ColoredString : IEnumerable<Pair<char, Color?>>, IEquatable<ColoredString>, ICloneable {
 
