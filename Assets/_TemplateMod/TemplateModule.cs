@@ -58,7 +58,6 @@ namespace TemplateMod {
 			rng = new System.Random(UnityEngine.Random.Range(0, int.MaxValue));
 			animationRunner = new AnimationRunner();
 			settings = SettingsReader<TemplateSettings>.ReadSettings();
-
 		}
 
 		#endregion
@@ -66,26 +65,16 @@ namespace TemplateMod {
 		#region /--- Events ---/
 
 		void Start() {
-
-			// Init
 			PrepareComponents();
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		void OnActivate() {
 
 		}
 
 		void Update() {
-			try {
-				animationRunner?.Update(TimeSpan.FromSeconds(Time.deltaTime));
-			} catch (System.Exception ex) {
-				// ReSharper disable Unity.PerformanceCriticalCodeInvocation
-				logger.LogString("Exception from AnimationRunner.");
-				logger.LogException(ex);
-				// ReSharper restore Unity.PerformanceCriticalCodeInvocation
-				animationRunner?.Clear();
-				throw;
-			}
+			animationRunner?.Update(TimeSpan.FromSeconds(Time.deltaTime));
 		}
 
 		void OnDestroy() {
