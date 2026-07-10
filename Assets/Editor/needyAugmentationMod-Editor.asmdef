@@ -1,0 +1,10 @@
+{
+  "name": "needyAugmentationMod-Editor",
+  "references": [
+    "needyAugmentationMod"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
