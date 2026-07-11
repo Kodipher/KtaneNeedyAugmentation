@@ -14,7 +14,10 @@ MonoBehaviour:
   id: needyAugmentationMod
   title: Need Augmentation
   author: Kodipher
-  description: 
+  description: 'A modded module, made to be a utility to balance needy modules.
+
+
+    The module itself does nothing, unless configured by the mission creator.'
   version: 0.0.0
   outputFolder: build
   debugBuild: 1
