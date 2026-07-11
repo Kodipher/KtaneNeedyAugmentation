@@ -8,7 +8,6 @@ Created using:
 
 
 # Template Filling Checklist:
-- Add missing fields in the `LICENSE`
 - Rename the section above in `README`
 - Configure Mod (in the ModKit menu)
 - Rename `_TemplateMod` folder
