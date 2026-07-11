@@ -1,15 +1,12 @@
-# MODULE NAME
+# Needy Augmentation
 
-A modded module for Keep Talking and Nobody Explodes.
+A modded module for Keep Talking and Nobody Explodes, made to be a utility to balance needy modules.
 
 Created using:
 - The [community fork of KTaNE Modkit](https://github.com/Qkrisi/ktanemodkit)
 - ModConfig script by samfundev
 
-
 # Template Filling Checklist:
-- Rename the section above in `README`
-- Configure Mod (in the ModKit menu)
 - Rename `_TemplateMod` folder
 - Rename `TemplateMod` namespace, the prefab and classes inside the scripts in said namespace
 - Attach the `GNS` script to the prefab
