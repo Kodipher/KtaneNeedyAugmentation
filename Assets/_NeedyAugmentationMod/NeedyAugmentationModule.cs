@@ -10,12 +10,12 @@ using SharedAssets.Utils;
 using TimeSpan = System.TimeSpan;
 
 
-namespace TemplateMod {
+namespace NeedyAugmentationMod {
 
 	[RequireComponent(typeof(KMBombModule))]
 	[RequireComponent(typeof(KMBombInfo))]
 	[RequireComponent(typeof(KMAudio))]
-	public class TemplateModule : MonoBehaviour {
+	public class NeedyAugmentationModule : MonoBehaviour {
 
 		#region /--- State ---/
 
@@ -42,7 +42,6 @@ namespace TemplateMod {
 		internal System.Random rng;
 		internal ModuleLogger logger;
 		internal AnimationRunner animationRunner;
-		internal TemplateSettings settings;
 
 		private void PrepareComponents() {
 
@@ -57,7 +56,6 @@ namespace TemplateMod {
 			logger = new ModuleLogger(kmModule);
 			rng = new System.Random(UnityEngine.Random.Range(0, int.MaxValue));
 			animationRunner = new AnimationRunner();
-			settings = SettingsReader<TemplateSettings>.ReadSettings();
 		}
 
 		#endregion

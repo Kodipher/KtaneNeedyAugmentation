@@ -1,6 +1,6 @@
 ﻿
 
-namespace TemplateMod {
+namespace NeedyAugmentationMod {
 
 	public static class SoundCatalogue {
 
