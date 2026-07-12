@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Rephidock.GeneralUtilities.Collections;
 using Rephidock.AtomicAnimations;
 using Rephidock.AtomicAnimations.Coroutines;
 
@@ -182,6 +183,39 @@ namespace NeedyAugmentationMod {
 		}
 		
 		#endregion
+		
+		#region /--- Display Texts ---/
+
+		const string AugmentedText = "AUGMETNED";
+		const string UnchangedText = "UNCHANGED";
+		
+		static readonly Pair<Color, Color> introColors = Pair.New(
+			new Color(0.8f, 0.8f, 0.8f, 0.8f), 
+			new Color(0.9f, 0.9f, 0.9f)
+		);
+		
+		static readonly Pair<Color, Color> augmentedColors = Pair.New(
+			new Color(0.8f, 0.8f, 0.0f, 0.8f), 
+			new Color(0.9f, 0.9f, 0.4f)
+		);
+		
+		static readonly Pair<Color, Color> unchangedColors = Pair.New(
+			new Color(0.8f, 0.5f, 0.0f, 0.8f), 
+			new Color(0.9f, 0.6f, 0.4f)
+		);
+		
+		static readonly Pair<Color, Color> errorColors = Pair.New(
+			new Color(1.0f, 0.2f, 0.0f, 0.8f), 
+			new Color(1.0f, 0.5f, 0.5f)
+		);
+
+		static readonly Pair<Color, Color> solvedColors = Pair.New(
+			new Color(0.2f, 1.0f, 0.2f), 
+			new Color(0.6f, 0.9f, 0.4f)
+		);
+		
+		#endregion
+		
 		#region /--- Routines ---/
 
 		IEnumerable<CoroutineYield> TemplateRoutine() {
