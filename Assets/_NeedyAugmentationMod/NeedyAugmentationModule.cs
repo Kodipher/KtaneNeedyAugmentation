@@ -73,6 +73,11 @@ namespace NeedyAugmentationMod {
 
 			kmModule.OnActivate += OnActivate;
 			
+			// Misc. common
+			logger = new ModuleLogger(kmModule);
+			rng = new System.Random(UnityEngine.Random.Range(0, int.MaxValue));
+			animationRunner = new AnimationRunner();
+			
 			// Button
 			acknowledgeButton = transform.Find("objectScaler/button");
 			
@@ -94,11 +99,6 @@ namespace NeedyAugmentationMod {
 			}
 
 			verticalDisplay = new VerticalDisplay(DisplayHeightCharacters, displayText, letterLights, logger);
-			
-			// Misc. common
-			logger = new ModuleLogger(kmModule);
-			rng = new System.Random(UnityEngine.Random.Range(0, int.MaxValue));
-			animationRunner = new AnimationRunner();
 		}
 
 		#endregion
