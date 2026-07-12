@@ -42,10 +42,11 @@ namespace NeedyAugmentationMod {
 		// Module parts
 		internal Transform acknowledgeButton;
 		internal KMSelectable acknowledgeButtonSelectable;
-		internal TextMesh displayText;
-		internal Light[] letterLights;
+
+		const int DisplayHeightCharacters = 9;
+		internal VerticalDisplay verticalDisplay; // created
 		
-		// Created 
+		// Misc. Created
 		internal System.Random rng;
 		internal ModuleLogger logger;
 		internal AnimationRunner animationRunner;
@@ -67,10 +68,10 @@ namespace NeedyAugmentationMod {
 			acknowledgeButtonSelectable.OnInteractEnded += OnButtonReleased;
 			
 			// Display
-			displayText = transform.Find("objectScaler/display/text").GetComponent<TextMesh>();
+			var displayText = transform.Find("objectScaler/display/text").GetComponent<TextMesh>();
 
 			var lightsTransform = transform.Find("objectScaler/display/lights");
-			letterLights = Enumerable
+			var letterLights = Enumerable
 							.Range(0, lightsTransform.childCount)
 							.Select(i => lightsTransform.GetChild(i).GetComponent<Light>())
 							.ToArray();
@@ -78,6 +79,8 @@ namespace NeedyAugmentationMod {
 			foreach (var letterLight in letterLights) {
 				letterLight.range *= transform.lossyScale.x;
 			}
+
+			verticalDisplay = new VerticalDisplay(DisplayHeightCharacters, displayText, letterLights, logger);
 			
 			// Misc. common
 			logger = new ModuleLogger(kmModule);
