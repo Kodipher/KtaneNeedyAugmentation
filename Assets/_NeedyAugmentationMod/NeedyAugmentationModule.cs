@@ -5,6 +5,7 @@ using System.Linq;
 using Rephidock.GeneralUtilities.Collections;
 using Rephidock.AtomicAnimations;
 using Rephidock.AtomicAnimations.Coroutines;
+using Rephidock.GeneralUtilities.Randomness;
 
 using SharedAssets.Utils;
 
@@ -31,7 +32,7 @@ namespace NeedyAugmentationMod {
 
 		State state = State.Initiating;
 
-		bool isButtonHeld = false; // for movement animation only
+		bool isButtonHeld = false;
 		
 		/// <summary>
 		/// The digit displayed, when the button is held.
@@ -108,10 +109,12 @@ namespace NeedyAugmentationMod {
 		void Start() {
 			PrepareComponents();
 			state = State.IntroAnimation; // hacky way to force a wait on hold
+			animationRunner.Run(LightsOffEndlessRoutine());
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		void OnActivate() {
+			animationRunner.Clear(); // stops LightsOff routine
 			animationRunner.Run(IntroAnimationRoutine());
 		}
 
@@ -193,9 +196,8 @@ namespace NeedyAugmentationMod {
 					}
 					
 					int releaseDigit = (SelectedDigit.Value + GetNeedyModuleCount()) % 10;
-					char releaseDigitChar = (char)('0' + releaseDigit);
 					
-					if (!currentTime.Contains(releaseDigitChar)) {
+					if (!currentTime.Contains(DigitToCharacter(releaseDigit))) {
 						logger.LogString("Incorrect.");
 						kmModule.HandleStrike();
 						SelectedDigit = null;
@@ -211,6 +213,7 @@ namespace NeedyAugmentationMod {
 					
 					logger.LogString("Module Solved.");
 					kmModule.HandlePass();
+					kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.CorrectChime, transform);
 					state = State.Solved;
 					animationRunner.Run(CorrectAnimationRoutine());
 					return;
@@ -271,6 +274,8 @@ namespace NeedyAugmentationMod {
 
 		const string AugmentedText = "AUGMETNED";
 		const string UnchangedText = "UNCHANGED";
+		const string IncorrectText = "X*X*X*X*X";
+		const string CorrectText = "CONFIMEDΩ";
 		
 		static readonly Pair<Color, Color> introColors = Pair.New(
 			new Color(0.8f, 0.8f, 0.8f, 0.8f), 
@@ -287,7 +292,7 @@ namespace NeedyAugmentationMod {
 			new Color(0.9f, 0.6f, 0.4f)
 		);
 		
-		static readonly Pair<Color, Color> errorColors = Pair.New(
+		static readonly Pair<Color, Color> strikeColors = Pair.New(
 			new Color(1.0f, 0.2f, 0.0f, 0.8f), 
 			new Color(1.0f, 0.5f, 0.5f)
 		);
@@ -301,33 +306,57 @@ namespace NeedyAugmentationMod {
 		
 		#region /--- Routines ---/
 
-		static readonly TimeSpan frameDuration = TimeSpan.FromSeconds(0.07);
+		static readonly TimeSpan frameDuration = TimeSpan.FromSeconds(0.075);
+		
+		static readonly char[] randomIntroCharacters = (
+														@"!@$%^&*()[]<>{}/\|,.-=+?0123456789" +
+														"abcdefghijklmnopqrstuvwxyz" +
+														"ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+														"£¥®µ¶¿ß÷čīšūžΏΐΓΔΛΞΠΣΤΦΨάαβδζηθλμνστω" +
+														"ЖЗИЦЩШЪЫЬЮЯабийлтщ€" +
+														"₸⃀√∟" +
+														"アイウオカキサケシスセタツムマルレ円"
+														).ToCharArray();
+		
+		IEnumerable<CoroutineYield> LightsOffEndlessRoutine() {
+			
+			const int repetitionsPerPair = 4;
+			
+			while (true) {
 
-		const char BarTop = '¯';
-		const char BarMiddle = '-';
-		const char BarBottom = '_';
+				char first = randomIntroCharacters.PickRandom(rng);
+				char second = randomIntroCharacters.PickRandom(rng);
+				
+				for (int repetitionsI = 0; repetitionsI < repetitionsPerPair; repetitionsI++) {
+					
+					for (int i = 0; i < verticalDisplay.Size; i++) {
+						bool isFirst = (i + repetitionsI) % 2 == 0;
+						verticalDisplay.Characters[i] = isFirst ? first : second;
+					}
+					
+					yield return CoroutineYield.Sleep(frameDuration);
+				}
+			}
+
+			// [unreachable]
+			throw new System.InvalidOperationException();
+			// ReSharper disable once IteratorNeverReturns
+		}
 		
 		IEnumerable<CoroutineYield> IntroAnimationRoutine() {
-
-			yield return CoroutineYield.Sleep(TimeSpan.FromSeconds(2));
 			
 			// Animate
-			// todo
 			verticalDisplay.Colors = introColors;
 			
-			for (int i = 0; i < verticalDisplay.Size * 2; i++) {
+			for (int frameI = 0; frameI < verticalDisplay.Size; frameI++) {
 				
 				verticalDisplay.ClearString();
-
-				char topChar = i % 2 == 0 ? BarTop : BarMiddle;
-				char bottomChar = topChar == BarTop ? BarBottom : BarMiddle;
-				
-				verticalDisplay.Characters[i/2] = topChar;
-				verticalDisplay.Characters[verticalDisplay.Size - i/2 - 1] = bottomChar;
+				verticalDisplay.Characters[frameI] = 'o';
+				verticalDisplay.Characters[verticalDisplay.Size - frameI - 1] = 'o';
 				
 				yield return CoroutineYield.Sleep(frameDuration);
 			}
-			
+
 			// Set correct display
 			// todo
 			verticalDisplay.SetString(AugmentedText);
@@ -340,20 +369,52 @@ namespace NeedyAugmentationMod {
 		IEnumerable<CoroutineYield> WaitUntilAwaitingThenPickDigit() {
 			yield return CoroutineYield.SleepUntilTrue(() => state == State.AwaitingHold || !isButtonHeld);
 
-			if (!isButtonHeld) yield break; // Released during intro animation -- do not proceed to held state.
+			if (!isButtonHeld) yield break; // Released too early -- do not proceed to held state.
 			
 			state = State.Held;
 			yield return PickDigitRoutine().ToAnimation();
 		}
 
 		IEnumerable<CoroutineYield> PickDigitRoutine() {
-			
+
 			// Animate
-			// todo
-			for (int i = 0; i < 20; i++) {
-				verticalDisplay.SetString(i.ToString());
+			int[] allPositions = Enumerable.Range(0, verticalDisplay.Size).ToArray();
+			allPositions.Shuffle(rng); // shuffles in place
+
+			for (int digitsDisplayed = 0; digitsDisplayed < allPositions.Length; digitsDisplayed += 2) {
+
+				for (int i = 0; i <= digitsDisplayed; i++) {
+					verticalDisplay.Characters[allPositions[i]] = DigitToCharacter(rng.Next(10));
+				}
+				
 				yield return CoroutineYield.Sleep(frameDuration);
-				if (!isButtonHeld) yield break;
+				if (!isButtonHeld) yield break; // if button is released too early
+			}
+			
+			for (int spacesFromSides = 0; spacesFromSides < verticalDisplay.Size / 2; spacesFromSides++) {
+				
+				int i = 0;
+				for (/*[nop]*/; i < spacesFromSides; i++) {
+					verticalDisplay.Characters[i] = ' ';
+				}
+				for (/*[nop]*/; i < verticalDisplay.Size - spacesFromSides; i++) {
+					verticalDisplay.Characters[i] = DigitToCharacter(rng.Next(10));
+				}
+				for (/*[nop]*/; i < verticalDisplay.Size; i++) {
+					verticalDisplay.Characters[i] = ' ';
+				}
+				
+				yield return CoroutineYield.Sleep(frameDuration);
+				if (!isButtonHeld) yield break; // if button is released too early
+			}
+
+			verticalDisplay.ClearString();
+			
+			const int fakeRolls = 3;
+			for (int fakeRollI = 0; fakeRollI <= fakeRolls; fakeRollI++) {
+				verticalDisplay.Characters[verticalDisplay.Size / 2] = DigitToCharacter(rng.Next(10));
+				yield return CoroutineYield.Sleep(frameDuration);
+				if (!isButtonHeld) yield break; // if button is released too early
 			}
 			
 			// Pick digit
@@ -364,17 +425,20 @@ namespace NeedyAugmentationMod {
 			logger.LogString($"There are {needyCount} needy modules.");
 			logger.LogString($"Release when a {releaseDigit} is in any position.");
 			
-			// Animate
-			// todo
-			verticalDisplay.SetString(SelectedDigit.ToString());
+			// Display
+			verticalDisplay.SetString($" - ¯{DigitToCharacter(SelectedDigit.Value)}_ - ");
 		}
 
 		IEnumerable<CoroutineYield> IncorrectRoutine() {
-			// Animate
-			// todo
-			verticalDisplay.Colors = errorColors;
-			for (int i = 0; i < 5; i++) {
-				verticalDisplay.SetString(i.ToString());
+			
+			verticalDisplay.Colors = strikeColors;
+			
+			for (int i = 0; i < 9; i++) {
+				if (i % 2 == 0) {
+					verticalDisplay.ClearString();
+				} else {
+					verticalDisplay.SetString(IncorrectText);
+				}
 				yield return CoroutineYield.Sleep(frameDuration);
 			}
 			
@@ -387,11 +451,21 @@ namespace NeedyAugmentationMod {
 		}
 		
 		IEnumerable<CoroutineYield> CorrectAnimationRoutine() {
-			// Animate
+			
+			verticalDisplay.Colors = solvedColors;
+			
+			for (int i = 0; i < 9; i++) {
+				if (i % 2 == 0) {
+					verticalDisplay.ClearString();
+				} else {
+					verticalDisplay.SetString(CorrectText);
+				}
+				yield return CoroutineYield.Sleep(frameDuration);
+			}
+			
+			// Reset with solved colors
 			// todo
 			verticalDisplay.SetString(AugmentedText);
-			verticalDisplay.Colors = solvedColors;
-			yield break;
 		}
 		
 		#endregion
@@ -399,7 +473,9 @@ namespace NeedyAugmentationMod {
 		int GetNeedyModuleCount() {
 			return kmBomb.GetModuleIDs().Count - kmBomb.GetSolvableModuleIDs().Count;
 		}
-		
+
+		char DigitToCharacter(int digit) => (char)('0' + digit);
+
 	}
 
 }
