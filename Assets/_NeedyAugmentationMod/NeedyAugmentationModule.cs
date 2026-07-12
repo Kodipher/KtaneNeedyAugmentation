@@ -37,7 +37,13 @@ namespace NeedyAugmentationMod {
 		internal KMBombModule kmModule;
 		internal KMBombInfo kmBomb;
 		internal KMAudio kmAudio;
-
+		
+		// Module parts
+		internal Transform acknowledgeButton;
+		internal KMSelectable acknowledgeButtonSelectable;
+		internal TextMesh displayText;
+		internal Light[] letterLights;
+		
 		// Created 
 		internal System.Random rng;
 		internal ModuleLogger logger;
@@ -51,7 +57,27 @@ namespace NeedyAugmentationMod {
 			kmAudio = GetComponent<KMAudio>();
 
 			kmModule.OnActivate += OnActivate;
+			
+			// Button
+			acknowledgeButton = transform.Find("objectScaler/button");
+			
+			acknowledgeButtonSelectable = acknowledgeButton.GetComponent<KMSelectable>();
+			acknowledgeButtonSelectable.OnInteract += () => { OnButtonHold(); return false; };
+			acknowledgeButtonSelectable.OnInteractEnded += OnButtonReleased;
+			
+			// Display
+			displayText = transform.Find("objectScaler/display/text").GetComponent<TextMesh>();
 
+			var lightsTransform = transform.Find("objectScaler/display/lights");
+			letterLights = Enumerable
+							.Range(0, lightsTransform.childCount)
+							.Select(i => lightsTransform.GetChild(i).GetComponent<Light>())
+							.ToArray();
+
+			foreach (var letterLight in letterLights) {
+				letterLight.range *= transform.lossyScale.x;
+			}
+			
 			// Misc. common
 			logger = new ModuleLogger(kmModule);
 			rng = new System.Random(UnityEngine.Random.Range(0, int.MaxValue));
@@ -77,6 +103,16 @@ namespace NeedyAugmentationMod {
 
 		void OnDestroy() {
 			animationRunner?.Dispose();
+		}
+
+		// ReSharper disable Unity.PerformanceAnalysis
+		void OnButtonHold() {
+			logger.LogString("Holding...");
+		}
+		
+		// ReSharper disable Unity.PerformanceAnalysis
+		void OnButtonReleased() {
+			logger.LogString("Released.");
 		}
 		
 		public void TwitchHandleForcedSolve() {
