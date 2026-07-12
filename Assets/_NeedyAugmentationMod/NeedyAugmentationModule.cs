@@ -299,7 +299,7 @@ namespace NeedyAugmentationMod {
 
 		static readonly Pair<Color, Color> solvedColors = Pair.New(
 			new Color(0.2f, 1.0f, 0.2f), 
-			new Color(0.6f, 0.9f, 0.4f)
+			new Color(0.3f, 0.9f, 0.3f)
 		);
 		
 		#endregion
@@ -312,13 +312,15 @@ namespace NeedyAugmentationMod {
 														@"!@$%^&*()[]<>{}/\|,.-=+?0123456789" +
 														"abcdefghijklmnopqrstuvwxyz" +
 														"ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-														"£¥®µ¶¿ß÷čīšūžΏΐΓΔΛΞΠΣΤΦΨάαβδζηθλμνστω" +
-														"ЖЗИЦЩШЪЫЬЮЯабийлтщ€" +
-														"₸⃀√∟" +
+														"€£¥®µ¶¿ß÷₸⃀√∟" +
+														"čīšūžΏΐΓΔΛΞΠΣΤΦΨάαβδζηθλμνστω" +
+														"ЖЗИЦЩШЪЫЬЮЯабийлтщ" +
 														"アイウオカキサケシスセタツムマルレ円"
 														).ToCharArray();
 		
 		IEnumerable<CoroutineYield> LightsOffEndlessRoutine() {
+
+			verticalDisplay.Colors = introColors;
 			
 			const int repetitionsPerPair = 4;
 			
@@ -357,11 +359,22 @@ namespace NeedyAugmentationMod {
 				yield return CoroutineYield.Sleep(frameDuration);
 			}
 
+			verticalDisplay.ClearString();
+			
 			// Set correct display
 			// todo
-			verticalDisplay.SetString(AugmentedText);
+			string displayText = AugmentedText;
 			verticalDisplay.Colors = augmentedColors;
 			
+			for (int i = 0; i < verticalDisplay.Size; i++) {
+				
+				verticalDisplay.Characters[i] = '#';
+				if (i > 0) verticalDisplay.Characters[i-1] = displayText[i-1];
+				
+				yield return CoroutineYield.Sleep(frameDuration);
+			}
+			
+			verticalDisplay.SetString(displayText);
 			state = State.AwaitingHold;
 		}
 
@@ -416,6 +429,7 @@ namespace NeedyAugmentationMod {
 				yield return CoroutineYield.Sleep(frameDuration);
 				if (!isButtonHeld) yield break; // if button is released too early
 			}
+			verticalDisplay.ClearString();
 			
 			// Pick digit
 			SelectedDigit = rng.Next(10);
@@ -425,8 +439,29 @@ namespace NeedyAugmentationMod {
 			logger.LogString($"There are {needyCount} needy modules.");
 			logger.LogString($"Release when a {releaseDigit} is in any position.");
 			
-			// Display
-			verticalDisplay.SetString($" - ¯{DigitToCharacter(SelectedDigit.Value)}_ - ");
+			// Display, animate endlessly
+			int center = verticalDisplay.Size / 2;
+			
+			while (true) {
+				for (int distanceFromEdgeInHalves = center * 2 - 1; distanceFromEdgeInHalves >= 0; distanceFromEdgeInHalves--) {
+					
+					verticalDisplay.ClearString();
+
+					char topChar = distanceFromEdgeInHalves % 2 == 0 ? '¯' : '-';
+					char bottomChar = topChar == '¯' ? '_' : '-';
+				
+					verticalDisplay.Characters[distanceFromEdgeInHalves/2] = topChar;
+					verticalDisplay.Characters[verticalDisplay.Size - distanceFromEdgeInHalves/2 - 1] = bottomChar;
+					verticalDisplay.Characters[center] = DigitToCharacter(SelectedDigit.Value);
+				
+					yield return CoroutineYield.Sleep(frameDuration);
+					if (!isButtonHeld) yield break; // when released is eventually released
+				}
+			}
+			
+			// [unreachable]
+			throw new System.InvalidOperationException();
+			// ReSharper disable once IteratorNeverReturns
 		}
 
 		IEnumerable<CoroutineYield> IncorrectRoutine() {
