@@ -26,6 +26,7 @@ namespace NeedyAugmentationMod {
 
 		State state = State.Initiating;
 
+		bool isButtonHeld = false;
 		// Expose log id for LFA at module instance (required by Tweaks)
 		public int LogFileAnalyzerId => this.logger.tagId ?? 0;
 
@@ -107,11 +108,31 @@ namespace NeedyAugmentationMod {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		void OnButtonHold() {
+
+			if (isButtonHeld) return;
+			isButtonHeld = true;
+			
+			// Cue
+			kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.BigButtonPress, acknowledgeButton);
+			acknowledgeButtonSelectable.AddInteractionPunch(0.5f);
+			animationRunner.Run(CreateButtonPressMovement());
+			
+			// Logic
 			logger.LogString("Holding...");
 		}
 		
 		// ReSharper disable Unity.PerformanceAnalysis
 		void OnButtonReleased() {
+			
+			if (!isButtonHeld) return;
+			isButtonHeld = false;
+			
+			// Cue
+			kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.BigButtonRelease, acknowledgeButton);
+			acknowledgeButtonSelectable.AddInteractionPunch(0.5f);
+			animationRunner.Run(CreateButtonReleaseMovement());
+			
+			// Logic
 			logger.LogString("Released.");
 		}
 		
@@ -125,7 +146,39 @@ namespace NeedyAugmentationMod {
 		}
 
 		#endregion
+		
+		#region /--- Run Button Animation ---/
+		
+		const float ButtonHeldOffsetY = -0.05f;
+		static readonly TimeSpan buttonPressAnimationDuration = TimeSpan.FromSeconds(0.075);
 
+		Shift1D CreateButtonPressMovement() {
+			return new Shift1D(
+				ButtonHeldOffsetY,
+				buttonPressAnimationDuration,
+				Easing.Linear,
+				(yy) => {
+					var position = acknowledgeButton.localPosition;
+					position.y += yy;
+					acknowledgeButton.localPosition = position;
+				}
+			);
+		}
+
+		Shift1D CreateButtonReleaseMovement() {
+			return new Shift1D(
+				-ButtonHeldOffsetY,
+				buttonPressAnimationDuration,
+				Easing.Linear,
+				(yy) => {
+					var position = acknowledgeButton.localPosition;
+					position.y += yy;
+					acknowledgeButton.localPosition = position;
+				}
+			);
+		}
+		
+		#endregion
 		#region /--- Routines ---/
 
 		IEnumerable<CoroutineYield> TemplateRoutine() {
