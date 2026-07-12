@@ -204,7 +204,7 @@ GameObject:
   - component: {fileID: 4955806060454292}
   - component: {fileID: 108084593919043028}
   m_Layer: 0
-  m_Name: Point light
+  m_Name: Point light (0)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1043,7 +1043,7 @@ TextMesh:
   m_Font: {fileID: 12800000, guid: df18c3bf7cb6801479be43f8bf85dd25, type: 3}
   m_Color:
     serializedVersion: 2
-    rgba: 4284004863
+    rgba: 4294967295
 --- !u!108 &108019208941935106
 Light:
   m_ObjectHideFlags: 1
@@ -1055,7 +1055,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -1091,7 +1091,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -1127,7 +1127,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -1163,7 +1163,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -1199,7 +1199,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -1235,7 +1235,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -1271,7 +1271,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -1307,7 +1307,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -1343,7 +1343,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
-  m_Range: 0.06
+  m_Range: 0.04
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
