@@ -22,17 +22,29 @@ namespace NeedyAugmentationMod {
 
 		private enum State {
 			Initiating,
+			IntroAnimation,
+			AwaitingHold,
+			Held,
+			StrikeAnimation,
 			Solved
 		}
 
 		State state = State.Initiating;
 
-		bool isButtonHeld = false;
+		bool isButtonHeld = false; // for movement animation only
+		
+		/// <summary>
+		/// The digit displayed, when the button is held.
+		/// Is null before the module picks a digit.
+		/// The digit is still stored, when the module is solved.
+		/// </summary>
+		int? SelectedDigit { get; set; } = null;
+
 		// Expose log id for LFA at module instance (required by Tweaks)
 		public int LogFileAnalyzerId => this.logger.tagId ?? 0;
-
+		
 		#endregion
-
+		
 		#region /--- Components and parts ---/
 
 		// KM
@@ -95,15 +107,18 @@ namespace NeedyAugmentationMod {
 
 		void Start() {
 			PrepareComponents();
+			state = State.IntroAnimation; // hacky way to force a wait on hold
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		void OnActivate() {
-
+			animationRunner.Run(IntroAnimationRoutine());
 		}
 
 		void Update() {
-			animationRunner?.Update(TimeSpan.FromSeconds(Time.deltaTime));
+			var deltaTimeSpan = TimeSpan.FromSeconds(Time.deltaTime);
+			animationRunner?.Update(deltaTimeSpan);
+			verticalDisplay?.Update(deltaTimeSpan);
 		}
 
 		void OnDestroy() {
@@ -122,7 +137,27 @@ namespace NeedyAugmentationMod {
 			animationRunner.Run(CreateButtonPressMovement());
 			
 			// Logic
-			logger.LogString("Holding...");
+			switch (state) {
+				
+				case State.IntroAnimation:
+				case State.StrikeAnimation:
+					logger.LogString("Holding and waiting for animation to finish...");
+					animationRunner.Run(WaitUntilAwaitingThenPickDigit());
+					break;
+				
+				case State.AwaitingHold:
+					logger.LogString("Holding...");
+					state = State.Held;
+					animationRunner.Run(PickDigitRoutine());
+					break;
+				
+				case State.Initiating:
+				case State.Held:
+				case State.Solved:
+				default:
+					return;
+			}
+			
 		}
 		
 		// ReSharper disable Unity.PerformanceAnalysis
@@ -137,7 +172,55 @@ namespace NeedyAugmentationMod {
 			animationRunner.Run(CreateButtonReleaseMovement());
 			
 			// Logic
-			logger.LogString("Released.");
+
+			switch (state) {
+				
+				case State.IntroAnimation:
+				case State.StrikeAnimation:
+				case State.Held:
+					string currentTime = kmBomb.GetFormattedTime();
+					logger.LogString($"Released at {currentTime}.");
+
+					if (!SelectedDigit.HasValue) {
+						logger.LogString("Display has not yet settled on a digit. No time is valid.");
+						kmModule.HandleStrike();
+
+						if (state == State.Held) {
+							state = State.StrikeAnimation;
+							animationRunner.Run(IncorrectRoutine());
+						}
+						return;
+					}
+					
+					int releaseDigit = (SelectedDigit.Value + GetNeedyModuleCount()) % 10;
+					char releaseDigitChar = (char)('0' + releaseDigit);
+					
+					if (!currentTime.Contains(releaseDigitChar)) {
+						logger.LogString("Incorrect.");
+						kmModule.HandleStrike();
+						SelectedDigit = null;
+
+						if (state != State.Held) {
+							throw new System.InvalidOperationException("Assertion failed. Somehow the digit is picked before holding.");
+						}
+						
+						state = State.StrikeAnimation;
+						animationRunner.Run(IncorrectRoutine());
+						return;
+					}
+					
+					logger.LogString("Module Solved.");
+					kmModule.HandlePass();
+					state = State.Solved;
+					animationRunner.Run(CorrectAnimationRoutine());
+					return;
+				
+				case State.Initiating:
+				case State.AwaitingHold:
+				case State.Solved:
+				default:
+					return;
+			}
 		}
 		
 		public void TwitchHandleForcedSolve() {
@@ -218,12 +301,105 @@ namespace NeedyAugmentationMod {
 		
 		#region /--- Routines ---/
 
-		IEnumerable<CoroutineYield> TemplateRoutine() {
-			yield break;
+		static readonly TimeSpan frameDuration = TimeSpan.FromSeconds(0.07);
+
+		const char BarTop = '¯';
+		const char BarMiddle = '-';
+		const char BarBottom = '_';
+		
+		IEnumerable<CoroutineYield> IntroAnimationRoutine() {
+
+			yield return CoroutineYield.Sleep(TimeSpan.FromSeconds(2));
+			
+			// Animate
+			// todo
+			verticalDisplay.Colors = introColors;
+			
+			for (int i = 0; i < verticalDisplay.Size * 2; i++) {
+				
+				verticalDisplay.ClearString();
+
+				char topChar = i % 2 == 0 ? BarTop : BarMiddle;
+				char bottomChar = topChar == BarTop ? BarBottom : BarMiddle;
+				
+				verticalDisplay.Characters[i/2] = topChar;
+				verticalDisplay.Characters[verticalDisplay.Size - i/2 - 1] = bottomChar;
+				
+				yield return CoroutineYield.Sleep(frameDuration);
+			}
+			
+			// Set correct display
+			// todo
+			verticalDisplay.SetString(AugmentedText);
+			verticalDisplay.Colors = augmentedColors;
+			
+			state = State.AwaitingHold;
 		}
 
+
+		IEnumerable<CoroutineYield> WaitUntilAwaitingThenPickDigit() {
+			yield return CoroutineYield.SleepUntilTrue(() => state == State.AwaitingHold || !isButtonHeld);
+
+			if (!isButtonHeld) yield break; // Released during intro animation -- do not proceed to held state.
+			
+			state = State.Held;
+			yield return PickDigitRoutine().ToAnimation();
+		}
+
+		IEnumerable<CoroutineYield> PickDigitRoutine() {
+			
+			// Animate
+			// todo
+			for (int i = 0; i < 20; i++) {
+				verticalDisplay.SetString(i.ToString());
+				yield return CoroutineYield.Sleep(frameDuration);
+				if (!isButtonHeld) yield break;
+			}
+			
+			// Pick digit
+			SelectedDigit = rng.Next(10);
+			int needyCount = GetNeedyModuleCount();
+			int releaseDigit = (SelectedDigit.Value + needyCount) % 10;
+			logger.LogString($"Digit on the display is {SelectedDigit}");
+			logger.LogString($"There are {needyCount} needy modules.");
+			logger.LogString($"Release when a {releaseDigit} is in any position.");
+			
+			// Animate
+			// todo
+			verticalDisplay.SetString(SelectedDigit.ToString());
+		}
+
+		IEnumerable<CoroutineYield> IncorrectRoutine() {
+			// Animate
+			// todo
+			verticalDisplay.Colors = errorColors;
+			for (int i = 0; i < 5; i++) {
+				verticalDisplay.SetString(i.ToString());
+				yield return CoroutineYield.Sleep(frameDuration);
+			}
+			
+			// Reset
+			// todo
+			verticalDisplay.SetString(AugmentedText);
+			verticalDisplay.Colors = augmentedColors;
+			
+			state = State.AwaitingHold;
+		}
+		
+		IEnumerable<CoroutineYield> CorrectAnimationRoutine() {
+			// Animate
+			// todo
+			verticalDisplay.SetString(AugmentedText);
+			verticalDisplay.Colors = solvedColors;
+			yield break;
+		}
+		
 		#endregion
 
+		int GetNeedyModuleCount() {
+			return kmBomb.GetModuleIDs().Count - kmBomb.GetSolvableModuleIDs().Count;
+		}
+		
 	}
 
 }

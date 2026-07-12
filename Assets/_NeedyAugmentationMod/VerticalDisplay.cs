@@ -129,6 +129,12 @@ namespace NeedyAugmentationMod {
 			}
 			
 		}
+
+		public void ClearString() {
+			for (int i = 0; i < Size; i++) {
+				Characters[i] = ' ';
+			}
+		}
 		
 	}
 
