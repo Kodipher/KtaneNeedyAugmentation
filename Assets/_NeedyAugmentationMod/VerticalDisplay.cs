@@ -44,9 +44,9 @@ namespace NeedyAugmentationMod {
 		/// Unlike normally / in <see cref="WaveEase"/>, this wave is treated as looping.
 		/// </remarks>
 		public Wave ColorLerpWave { get; set; } = new WaveBuilder() { StartValue = 0 }
-			.Add(Easing.QuadInOut).To(1).Over(4)
-			.Add(Easing.QuadInOut).To(0).Over(4)
-			.ToWave();
+														.Add(Easing.QuadInOut).To(1).Over(2)
+														.Add(Easing.QuadInOut).To(0).Over(2)
+														.ToWave();
 
 		/// <summary>In characters per second.</summary>
 		public double ColorLerpWaveSpeed { get; set; } = 4;
