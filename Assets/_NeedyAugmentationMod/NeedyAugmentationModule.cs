@@ -14,33 +14,15 @@ using TimeSpan = System.TimeSpan;
 
 namespace NeedyAugmentationMod {
 
-	[RequireComponent(typeof(KMBombModule))]
+	[RequireComponent(typeof(KMNeedyModule))]
 	[RequireComponent(typeof(KMBombInfo))]
 	[RequireComponent(typeof(KMAudio))]
 	public class NeedyAugmentationModule : MonoBehaviour {
 
 		#region /--- State ---/
 
-		private enum State {
-			Initiating,
-			IntroAnimation,
-			AwaitingHold,
-			Held,
-			StrikeAnimation,
-			Solved
-		}
-
-		State state = State.Initiating;
-
-		bool isButtonHeld = false;
+		bool isNeedyRunning = false;
 		
-		/// <summary>
-		/// The digit displayed, when the button is held.
-		/// Is null before the module picks a digit.
-		/// The digit is still stored, when the module is solved.
-		/// </summary>
-		int? SelectedDigit { get; set; } = null;
-
 		// Expose log id for LFA at module instance (required by Tweaks)
 		public int LogFileAnalyzerId => this.logger.tagId ?? 0;
 		
@@ -49,7 +31,7 @@ namespace NeedyAugmentationMod {
 		#region /--- Components and parts ---/
 
 		// KM
-		internal KMBombModule kmModule;
+		internal KMNeedyModule kmNeedyModule;
 		internal KMBombInfo kmBomb;
 		internal KMAudio kmAudio;
 		
@@ -68,14 +50,17 @@ namespace NeedyAugmentationMod {
 		private void PrepareComponents() {
 
 			// KM
-			kmModule = GetComponent<KMBombModule>();
+			kmNeedyModule = GetComponent<KMNeedyModule>();
 			kmBomb = GetComponent<KMBombInfo>();
 			kmAudio = GetComponent<KMAudio>();
 
-			kmModule.OnActivate += OnActivate;
+			kmNeedyModule.OnActivate += OnActivate;
+			kmNeedyModule.OnNeedyActivation += OnNeedyActivation;
+			kmNeedyModule.OnNeedyDeactivation += OnNeedyTerminated; // because that is how the proxy works
+			kmNeedyModule.OnTimerExpired += OnNeedyTimerExpired;
 			
 			// Misc. common
-			logger = new ModuleLogger(kmModule);
+			logger = new ModuleLogger(kmNeedyModule);
 			rng = new System.Random(UnityEngine.Random.Range(0, int.MaxValue));
 			animationRunner = new AnimationRunner();
 			
@@ -83,8 +68,7 @@ namespace NeedyAugmentationMod {
 			acknowledgeButton = transform.Find("objectScaler/button");
 			
 			acknowledgeButtonSelectable = acknowledgeButton.GetComponent<KMSelectable>();
-			acknowledgeButtonSelectable.OnInteract += () => { OnButtonHold(); return false; };
-			acknowledgeButtonSelectable.OnInteractEnded += OnButtonReleased;
+			acknowledgeButtonSelectable.OnInteract += () => { OnButtonPress(); return false; };
 			
 			// Display
 			var displayText = transform.Find("objectScaler/display/text").GetComponent<TextMesh>();
@@ -108,13 +92,13 @@ namespace NeedyAugmentationMod {
 
 		void Start() {
 			PrepareComponents();
-			state = State.IntroAnimation; // hacky way to force a wait on hold
-			animationRunner.Run(LightsOffEndlessRoutine());
+			animationRunner.Run(FixTimerPositionRoutine());
+			animationRunner.Run(RandomCharacterFlashInfiniteRoutine());
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		void OnActivate() {
-			animationRunner.Clear(); // stops LightsOff routine
+			animationRunner.Clear(); // stops RandomCharacterFlashRoutine routine
 			animationRunner.Run(IntroAnimationRoutine());
 		}
 
@@ -128,143 +112,76 @@ namespace NeedyAugmentationMod {
 			animationRunner?.Dispose();
 		}
 
-		// ReSharper disable Unity.PerformanceAnalysis
-		void OnButtonHold() {
-
-			if (isButtonHeld) return;
-			isButtonHeld = true;
-			
-			// Cue
-			kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.BigButtonPress, acknowledgeButton);
-			acknowledgeButtonSelectable.AddInteractionPunch(0.5f);
-			animationRunner.Run(CreateButtonPressMovement());
-			
-			// Logic
-			switch (state) {
-				
-				case State.IntroAnimation:
-				case State.StrikeAnimation:
-					logger.LogString("Holding and waiting for animation to finish...");
-					animationRunner.Run(WaitUntilAwaitingThenPickDigit());
-					break;
-				
-				case State.AwaitingHold:
-					logger.LogString("Holding...");
-					state = State.Held;
-					animationRunner.Run(PickDigitInfiniteRoutine());
-					break;
-				
-				case State.Initiating:
-				case State.Held:
-				case State.Solved:
-				default:
-					return;
-			}
-			
+		void OnNeedyActivation() {
+			isNeedyRunning = true;
+			animationRunner.Run(DrainingBarInfiniteRoutine());
 		}
-		
+
 		// ReSharper disable Unity.PerformanceAnalysis
-		void OnButtonReleased() {
-			
-			if (!isButtonHeld) return;
-			isButtonHeld = false;
-			
-			// Cue
-			kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.BigButtonRelease, acknowledgeButton);
-			acknowledgeButtonSelectable.AddInteractionPunch(0.5f);
-			animationRunner.Run(CreateButtonReleaseMovement());
-			
-			// Logic
-
-			switch (state) {
-				
-				case State.IntroAnimation:
-				case State.StrikeAnimation:
-				case State.Held:
-					string currentTime = kmBomb.GetFormattedTime();
-					logger.LogString($"Released at {currentTime}.");
-
-					if (!SelectedDigit.HasValue) {
-						logger.LogString("Display has not yet settled on a digit. No time is valid.");
-						kmModule.HandleStrike();
-
-						if (state == State.Held) {
-							state = State.StrikeAnimation;
-							animationRunner.Run(IncorrectRoutine());
-						}
-						return;
-					}
-					
-					int releaseDigit = (SelectedDigit.Value + GetNeedyModuleCount()) % 10;
-					
-					if (!currentTime.Contains(DigitToCharacter(releaseDigit))) {
-						logger.LogString("Incorrect.");
-						kmModule.HandleStrike();
-						SelectedDigit = null;
-
-						if (state != State.Held) {
-							throw new System.InvalidOperationException("Assertion failed. Somehow the digit is picked before holding.");
-						}
-						
-						state = State.StrikeAnimation;
-						animationRunner.Run(IncorrectRoutine());
-						return;
-					}
-					
-					logger.LogString("Module Solved.");
-					kmModule.HandlePass();
-					kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.CorrectChime, transform);
-					state = State.Solved;
-					animationRunner.Run(CorrectAnimationRoutine());
-					return;
-				
-				case State.Initiating:
-				case State.AwaitingHold:
-				case State.Solved:
-				default:
-					return;
-			}
-		}
-		
-		public void TwitchHandleForcedSolve() {
-			logger.LogString("Forced solve command received. Ending routines.");
+		void OnNeedyTerminated() {
+			OnNeedyDeactivation();
 			animationRunner.Clear();
+			animationRunner.Run(WriteOutTextRoutine(""));
+		}
+		
+		void OnNeedyDeactivation() {
+			isNeedyRunning = false;
+		}
+
+		// ReSharper disable Unity.PerformanceAnalysis
+		void OnNeedyTimerExpired() {
+			kmNeedyModule.HandleStrike();
+			OnNeedyDeactivation(); // need to deactivate manually because... that is how the proxy works
+			animationRunner.Run(StrikeRoutine());
+		}
+
+		// ReSharper disable Unity.PerformanceAnalysis
+		void OnButtonPress() {
 			
-			state = State.Solved;
-			kmModule.HandlePass();
-			logger.LogString("Module solved.");
+			// Cue
+			kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, acknowledgeButton);
+			acknowledgeButtonSelectable.AddInteractionPunch(0.5f);
+			animationRunner.Run(ButtonPressMovementRoutine());
+
+			// Logic
+			if (!isNeedyRunning) return;
+
+			float solveAtTime = kmNeedyModule.GetNeedyTimeRemaining();
+			
+			kmNeedyModule.HandlePass();
+			OnNeedyDeactivation(); // need to deactivate manually because... that is how the proxy works
+			animationRunner.Run(PassRoutine(solveAtTime));
 		}
 
 		#endregion
 		
-		#region /--- Run Button Animation ---/
+		#region /--- Button Routine ---/
 		
 		const float ButtonHeldOffsetY = -0.05f;
 		static readonly TimeSpan buttonPressAnimationDuration = TimeSpan.FromSeconds(0.075);
 
-		Shift1D CreateButtonPressMovement() {
-			return new Shift1D(
+		IEnumerable<CoroutineYield> ButtonPressMovementRoutine() {
+
+			System.Action<float> yPosSetter = yy => {
+				var position = acknowledgeButton.localPosition;
+				position.y += yy;
+				acknowledgeButton.localPosition = position;
+			};
+
+			yield return new Shift1D(
 				ButtonHeldOffsetY,
 				buttonPressAnimationDuration,
 				Easing.Linear,
-				(yy) => {
-					var position = acknowledgeButton.localPosition;
-					position.y += yy;
-					acknowledgeButton.localPosition = position;
-				}
+				yPosSetter
 			);
-		}
 
-		Shift1D CreateButtonReleaseMovement() {
-			return new Shift1D(
+			yield return CoroutineYield.WaitPrevious;
+
+			yield return new Shift1D(
 				-ButtonHeldOffsetY,
 				buttonPressAnimationDuration,
 				Easing.Linear,
-				(yy) => {
-					var position = acknowledgeButton.localPosition;
-					position.y += yy;
-					acknowledgeButton.localPosition = position;
-				}
+				yPosSetter
 			);
 		}
 		
@@ -274,15 +191,16 @@ namespace NeedyAugmentationMod {
 
 		const string AugmentedText = "AUGMETNED";
 		const string UnchangedText = "UNCHANGED";
-		const string IncorrectText = "X*X*X*X*X";
-		const string CorrectText = "CONFIMEDΩ";
+		const string NoConfigText = "NO CONFIG";
+		const string StrikeText = "X*X*X*X*X";
+		const string PassText = "REFILLED ";
 		
 		static readonly Pair<Color, Color> introColors = Pair.New(
 			new Color(0.8f, 0.8f, 0.8f, 0.8f), 
 			new Color(0.9f, 0.9f, 0.9f)
 		);
 		
-		static readonly Pair<Color, Color> augmentedColors = Pair.New(
+		static readonly Pair<Color, Color> noConfigColors = Pair.New(
 			new Color(0.8f, 0.8f, 0.0f, 0.8f), 
 			new Color(0.9f, 0.9f, 0.4f)
 		);
@@ -292,21 +210,15 @@ namespace NeedyAugmentationMod {
 			new Color(0.9f, 0.6f, 0.4f)
 		);
 		
-		static readonly Pair<Color, Color> strikeColors = Pair.New(
+		static readonly Pair<Color, Color> errorColors = Pair.New(
 			new Color(1.0f, 0.2f, 0.0f, 0.8f), 
 			new Color(1.0f, 0.5f, 0.5f)
 		);
 
-		static readonly Pair<Color, Color> solvedColors = Pair.New(
+		static readonly Pair<Color, Color> augmentedColors = Pair.New(
 			new Color(0.2f, 1.0f, 0.2f), 
-			new Color(0.3f, 0.9f, 0.3f)
+			new Color(0.4f, 0.9f, 0.4f)
 		);
-		
-		#endregion
-		
-		#region /--- Routines ---/
-
-		static readonly TimeSpan frameDuration = TimeSpan.FromSeconds(0.075);
 		
 		static readonly char[] randomIntroCharacters = (
 														@"!@$%^&*()[]<>{}/\|,.-=+?0123456789" +
@@ -317,8 +229,17 @@ namespace NeedyAugmentationMod {
 														"ЖЗИЦЩШЪЫЬЮЯабийлтщ" +
 														"アイウオカキサケシスセタツムマルレ円"
 														).ToCharArray();
+
+		static readonly char[] fillProgressCharacters = " _шШ#".ToCharArray();
 		
-		IEnumerable<CoroutineYield> LightsOffEndlessRoutine() {
+		#endregion
+		
+		#region /--- Display Routines ---/
+
+		static readonly TimeSpan frameDuration = TimeSpan.FromSeconds(0.075);
+		
+		/// <remarks>Enumerates infinitely.</remarks>
+		IEnumerable<CoroutineYield> RandomCharacterFlashInfiniteRoutine() {
 
 			verticalDisplay.Colors = introColors;
 			
@@ -363,131 +284,97 @@ namespace NeedyAugmentationMod {
 			
 			// Set correct display
 			foreach (var @yield in WriteOutCurrentStateRoutine()) yield return @yield;
-			state = State.AwaitingHold;
 		}
+		
+		/// <remarks>Enumerates infinitely, until <see cref="isNeedyRunning"/> is false.</remarks>
+		IEnumerable<CoroutineYield> DrainingBarInfiniteRoutine() {
+			while (isNeedyRunning) {
 
+				float maxTime = kmNeedyModule.CountdownTime;
+				float currentTime = kmNeedyModule.GetNeedyTimeRemaining();
 
-		IEnumerable<CoroutineYield> WaitUntilAwaitingThenPickDigit() {
-			yield return CoroutineYield.SleepUntilTrue(() => state == State.AwaitingHold || !isButtonHeld);
+				float fillProgressInCharacters = currentTime * verticalDisplay.Size / maxTime;
 
-			if (!isButtonHeld) yield break; // Released too early -- do not proceed to held state.
-			
-			state = State.Held;
-			yield return PickDigitInfiniteRoutine().ToAnimation();
-		}
-
-		/// <remarks>Picks the digit before the infinite animation.</remarks>
-		IEnumerable<CoroutineYield> PickDigitInfiniteRoutine() {
-
-			// Animate
-			for (int spacesFromSides = 0; spacesFromSides < verticalDisplay.Size / 2; spacesFromSides++) {
+				DrawBar(fillProgressInCharacters);
 				
-				int i = 0;
-				for (/*[nop]*/; i < spacesFromSides; i++) {
-					verticalDisplay.Characters[i] = ' ';
-				}
-				for (/*[nop]*/; i < verticalDisplay.Size - spacesFromSides; i++) {
-					verticalDisplay.Characters[i] = DigitToCharacter(rng.Next(10));
-				}
-				for (/*[nop]*/; i < verticalDisplay.Size; i++) {
-					verticalDisplay.Characters[i] = ' ';
-				}
-				
-				yield return CoroutineYield.Sleep(frameDuration);
-				if (!isButtonHeld) yield break; // if button is released too early
+				yield return CoroutineYield.Suspend; // run every frame
 			}
+		}
+
+		IEnumerable<CoroutineYield> StrikeRoutine() {
 			
+			verticalDisplay.Colors = errorColors;
 			verticalDisplay.ClearString();
-			
-			// Pick digit
-			SelectedDigit = rng.Next(10);
-			int needyCount = GetNeedyModuleCount();
-			int releaseDigit = (SelectedDigit.Value + needyCount) % 10;
-			logger.LogString($"Digit on the display is {SelectedDigit}");
-			logger.LogString($"There are {needyCount} needy modules.");
-			logger.LogString($"Release when a {releaseDigit} is in any position.");
-			
-			// Display, animate endlessly
-			int center = verticalDisplay.Size / 2;
-			
-			while (true) {
-				for (int distanceFromEdgeInHalves = center * 2 - 1; distanceFromEdgeInHalves >= 0; distanceFromEdgeInHalves--) {
+
+			for (int i = 0; i < verticalDisplay.Size; i++) {
 					
-					verticalDisplay.ClearString();
+				int position = verticalDisplay.Size - 1 - i;
 
-					char topChar = distanceFromEdgeInHalves % 2 == 0 ? '¯' : '-';
-					char bottomChar = topChar == '¯' ? '_' : '-';
-				
-					verticalDisplay.Characters[distanceFromEdgeInHalves/2] = topChar;
-					verticalDisplay.Characters[verticalDisplay.Size - distanceFromEdgeInHalves/2 - 1] = bottomChar;
-					verticalDisplay.Characters[center] = DigitToCharacter(SelectedDigit.Value);
-				
-					yield return CoroutineYield.Sleep(frameDuration);
-					if (!isButtonHeld) yield break; // when released is eventually released
-				}
+				verticalDisplay.Characters[position] = StrikeText[position];
+				if (i % 2 == 0) yield return CoroutineYield.Sleep(frameDuration);
 			}
-			
-			// [unreachable]
-			throw new System.InvalidOperationException();
-			// ReSharper disable once IteratorNeverReturns
-		}
-
-		IEnumerable<CoroutineYield> IncorrectRoutine() {
-			
-			verticalDisplay.Colors = strikeColors;
-			verticalDisplay.ClearString();
-
-			int center = verticalDisplay.Size / 2;
-			for (int size = 0; size <= center; size++) {
-				verticalDisplay.Characters[center - size] = IncorrectText[size];
-				verticalDisplay.Characters[center + size] = IncorrectText[size];
-				if (size % 2 == 0) yield return CoroutineYield.Sleep(frameDuration);
-			}
-			
-			verticalDisplay.SetString(IncorrectText);
+			verticalDisplay.SetString(StrikeText);
 			
 			for (int i = 0; i < 7; i++) {
 				if (i % 2 == 0) {
 					verticalDisplay.ClearString();
 				} else {
-					verticalDisplay.SetString(IncorrectText);
+					verticalDisplay.SetString(StrikeText);
 				}
 				yield return CoroutineYield.Sleep(frameDuration);
 			}
 			
 			// Reset
 			foreach (var @yield in WriteOutCurrentStateRoutine()) yield return @yield;
-			state = State.AwaitingHold;
 		}
+
+
+		static readonly TimeSpan refillDuration = TimeSpan.FromSeconds(2);
+		static readonly EasingCurve refillEasing = Easing.CubicOut;
 		
-		IEnumerable<CoroutineYield> CorrectAnimationRoutine() {
+		IEnumerable<CoroutineYield> PassRoutine(float solvedAtTime) {
+
+			float maxTime = kmNeedyModule.CountdownTime;
 			
-			verticalDisplay.Colors = solvedColors;
+			yield return new Move1D(
+								solvedAtTime * verticalDisplay.Size / maxTime,
+								verticalDisplay.Size,
+								refillDuration,
+								refillEasing,
+								DrawBar
+							);
+			yield return CoroutineYield.WaitPrevious;
+			yield return CoroutineYield.Sleep(frameDuration);
 			
 			for (int i = 0; i < 9; i++) {
 				if (i % 2 == 0) {
 					verticalDisplay.ClearString();
 				} else {
-					verticalDisplay.SetString(CorrectText);
+					verticalDisplay.SetString(PassText);
 				}
 				yield return CoroutineYield.Sleep(frameDuration);
 			}
 			
-			// Reset with solved colors
-			// todo
-			verticalDisplay.SetString(AugmentedText);
+			// Reset
+			foreach (var @yield in WriteOutCurrentStateRoutine()) yield return @yield;
 		}
 		
 		public IEnumerable<CoroutineYield> WriteOutCurrentStateRoutine(bool setColor = true) {
 			
 			// todo
-			string displayText = AugmentedText;
-			
-			if (setColor) {
-				verticalDisplay.Colors = augmentedColors;
-			}
+			string displayText = NoConfigText;
+			var displayColor = noConfigColors;
 			
 			// Animate
+			if (setColor) {
+				verticalDisplay.Colors = displayColor;
+			}
+			
+			foreach (var @yield in WriteOutTextRoutine(displayText)) yield return @yield;
+		}
+		
+		public IEnumerable<CoroutineYield> WriteOutTextRoutine(string displayText) {
+			
 			for (int i = 0; i < verticalDisplay.Size; i++) {
 				
 				verticalDisplay.Characters[i] = '#';
@@ -502,14 +389,49 @@ namespace NeedyAugmentationMod {
 			verticalDisplay.SetString(displayText);
 		}
 		
+		/// <param name="fillAmountCharacters">Fill amount. 1.0 corresponds to 1 full character.</param>
+		void DrawBar(float fillAmountCharacters) {
+			
+			// Extend the "last drop"
+			int maxChrIndex = fillProgressCharacters.Length - 1;
+			float fillPerChrIndex = 1f / maxChrIndex;
+			
+			if (fillAmountCharacters >= fillPerChrIndex * 0.25f && fillAmountCharacters <= fillPerChrIndex) {
+				fillAmountCharacters = fillPerChrIndex;
+			}
+			
+			// Extend the topped out
+			if (fillAmountCharacters + fillPerChrIndex * 0.25f >= verticalDisplay.Size) {
+				fillAmountCharacters = verticalDisplay.Size;
+			}
+			
+			// Draw
+			for (int i = 0; i < verticalDisplay.Size; i++) {
+					
+				int position = verticalDisplay.Size - 1 - i;
+				float chrProgress = Mathf.Clamp(fillAmountCharacters - i, 0, 1);
+				int chrIndex = Mathf.FloorToInt(chrProgress * maxChrIndex);
+				
+				verticalDisplay.Characters[position] = fillProgressCharacters[chrIndex];
+			}
+			
+		}
+		
 		#endregion
 
-		int GetNeedyModuleCount() {
-			return kmBomb.GetModuleIDs().Count - kmBomb.GetSolvableModuleIDs().Count;
+		IEnumerable<CoroutineYield> FixTimerPositionRoutine() {
+			
+			// Original source
+			// https://github.com/VFlyer/FlyersOtherModules/blob/master/Assets/NeedyPuzzleLeague/CollapseCore.cs
+
+			yield return CoroutineYield.Suspend; // wait a frame
+			
+			var needyTimer = transform.Find("NeedyTimer(Clone)");
+			if (needyTimer == null) yield break;
+			
+			needyTimer.transform.Rotate(Vector3.up * -90);
 		}
-
-		char DigitToCharacter(int digit) => (char)('0' + digit);
-
+		
 	}
 
 }

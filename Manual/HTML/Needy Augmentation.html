@@ -45,36 +45,41 @@
 
                 <ul>
                     <li>
-                        This utility module balances or otherwise changes 
-                        activation behavior of needy modules on the same bomb.
+                        This utility needy balances or otherwise changes 
+                        activation behavior of other needy modules.
                     </li>
+                    <li>This module can only affect modules on the same bomb.</li>
                     <li>Behavior and difficulty changes are mission-specific.<sup>*</sup></li>
-                    <li>Despite the name, the module itself is solvable.</li>
-                </ul>
-                <ul>
-                    <li>When the module is configured, a special sound plays when the bomb starts.<sup>†</sup></li>
-                    <li>The display will read <b>“AUGMENTED”</b>, if augmentations are in effect.</li>
-                    <li>The display will read <b>“UNCHANGED”</b> otherwise.</li>
                 </ul>
 
                 <p class="comment">
                     * Module’s configuration has to be placed in the mission's description.<br>
-                    Consider using the <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3127095798&searchtext">Description Hider</a> 
-                    mod.
-                </p>
-                <p class="comment">
-                    † If the configuration has an error, a strike sound plays right after.<br>
-                    No actual strike is recorded and no augmentations are made.
+                    Refer to “On the Subject of Setting Up Needy Augmentation”.
                 </p>
 
-                
-                <h3>Solving Needy Augmentation</h3>
+                <h3>When Configured</h3>
                 <ul>
-                    <li>Hold the “Acknowledge” button.</li>
-                    <li>The display will eventually settle on a digit.</li>
-                    <li>Add that digit to the number of needy modules on the bomb.</li>
-                    <li>Keep only the least significant digit, if the result is 10 or greater.</li>
-                    <li>Release the button when the countdown timer has the result in any position.</li>
+                    <li>The display will read <b>“AUGMENTED”</b>, if augmentations are in effect.</li>
+                    <li>The display will read <b>“UNCHANGED”</b> otherwise.</li>
+                    <li>Needy&nbsp;Augmentation itself will never activate.</li>
+                    <li>A special sound also plays when the bomb starts.<sup>†</sup></li>
+                    <li>
+                        Only 1 Needy&nbsp;Augmentation can behave like this on each bomb. 
+                        Every other instance of Needy&nbsp;Augmentation will behave like it is not configured.
+                    </li>
+                </ul>
+
+                <p class="comment">
+                    † If the configuration has an error, a strike sound plays right after.<br>
+                    No actual strike is recorded and no augmentations are made,
+                    however the module will still not activate.
+                </p>
+
+                <h3>When Not Configured</h3>
+                <ul>
+                    <li>The display will read <b>“NO CONFIG”</b>.</li>
+                    <li>When this module activates, a bar will appear and it will start to drain.</li>
+                    <li>Press the “Refill” button to deactivate the module.</li>
                 </ul>
 
             </div>
