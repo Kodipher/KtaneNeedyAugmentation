@@ -151,7 +151,7 @@ namespace NeedyAugmentationMod {
 				case State.AwaitingHold:
 					logger.LogString("Holding...");
 					state = State.Held;
-					animationRunner.Run(PickDigitRoutine());
+					animationRunner.Run(PickDigitInfiniteRoutine());
 					break;
 				
 				case State.Initiating:
@@ -362,19 +362,7 @@ namespace NeedyAugmentationMod {
 			verticalDisplay.ClearString();
 			
 			// Set correct display
-			// todo
-			string displayText = AugmentedText;
-			verticalDisplay.Colors = augmentedColors;
-			
-			for (int i = 0; i < verticalDisplay.Size; i++) {
-				
-				verticalDisplay.Characters[i] = '#';
-				if (i > 0) verticalDisplay.Characters[i-1] = displayText[i-1];
-				
-				yield return CoroutineYield.Sleep(frameDuration);
-			}
-			
-			verticalDisplay.SetString(displayText);
+			foreach (var @yield in WriteOutCurrentStateRoutine()) yield return @yield;
 			state = State.AwaitingHold;
 		}
 
@@ -385,25 +373,13 @@ namespace NeedyAugmentationMod {
 			if (!isButtonHeld) yield break; // Released too early -- do not proceed to held state.
 			
 			state = State.Held;
-			yield return PickDigitRoutine().ToAnimation();
+			yield return PickDigitInfiniteRoutine().ToAnimation();
 		}
 
-		IEnumerable<CoroutineYield> PickDigitRoutine() {
+		/// <remarks>Picks the digit before the infinite animation.</remarks>
+		IEnumerable<CoroutineYield> PickDigitInfiniteRoutine() {
 
 			// Animate
-			int[] allPositions = Enumerable.Range(0, verticalDisplay.Size).ToArray();
-			allPositions.Shuffle(rng); // shuffles in place
-
-			for (int digitsDisplayed = 0; digitsDisplayed < allPositions.Length; digitsDisplayed += 2) {
-
-				for (int i = 0; i <= digitsDisplayed; i++) {
-					verticalDisplay.Characters[allPositions[i]] = DigitToCharacter(rng.Next(10));
-				}
-				
-				yield return CoroutineYield.Sleep(frameDuration);
-				if (!isButtonHeld) yield break; // if button is released too early
-			}
-			
 			for (int spacesFromSides = 0; spacesFromSides < verticalDisplay.Size / 2; spacesFromSides++) {
 				
 				int i = 0;
@@ -420,15 +396,7 @@ namespace NeedyAugmentationMod {
 				yield return CoroutineYield.Sleep(frameDuration);
 				if (!isButtonHeld) yield break; // if button is released too early
 			}
-
-			verticalDisplay.ClearString();
 			
-			const int fakeRolls = 3;
-			for (int fakeRollI = 0; fakeRollI <= fakeRolls; fakeRollI++) {
-				verticalDisplay.Characters[verticalDisplay.Size / 2] = DigitToCharacter(rng.Next(10));
-				yield return CoroutineYield.Sleep(frameDuration);
-				if (!isButtonHeld) yield break; // if button is released too early
-			}
 			verticalDisplay.ClearString();
 			
 			// Pick digit
@@ -467,8 +435,18 @@ namespace NeedyAugmentationMod {
 		IEnumerable<CoroutineYield> IncorrectRoutine() {
 			
 			verticalDisplay.Colors = strikeColors;
+			verticalDisplay.ClearString();
+
+			int center = verticalDisplay.Size / 2;
+			for (int size = 0; size <= center; size++) {
+				verticalDisplay.Characters[center - size] = IncorrectText[size];
+				verticalDisplay.Characters[center + size] = IncorrectText[size];
+				if (size % 2 == 0) yield return CoroutineYield.Sleep(frameDuration);
+			}
 			
-			for (int i = 0; i < 9; i++) {
+			verticalDisplay.SetString(IncorrectText);
+			
+			for (int i = 0; i < 7; i++) {
 				if (i % 2 == 0) {
 					verticalDisplay.ClearString();
 				} else {
@@ -478,10 +456,7 @@ namespace NeedyAugmentationMod {
 			}
 			
 			// Reset
-			// todo
-			verticalDisplay.SetString(AugmentedText);
-			verticalDisplay.Colors = augmentedColors;
-			
+			foreach (var @yield in WriteOutCurrentStateRoutine()) yield return @yield;
 			state = State.AwaitingHold;
 		}
 		
@@ -501,6 +476,30 @@ namespace NeedyAugmentationMod {
 			// Reset with solved colors
 			// todo
 			verticalDisplay.SetString(AugmentedText);
+		}
+		
+		public IEnumerable<CoroutineYield> WriteOutCurrentStateRoutine(bool setColor = true) {
+			
+			// todo
+			string displayText = AugmentedText;
+			
+			if (setColor) {
+				verticalDisplay.Colors = augmentedColors;
+			}
+			
+			// Animate
+			for (int i = 0; i < verticalDisplay.Size; i++) {
+				
+				verticalDisplay.Characters[i] = '#';
+
+				if (i > 0) {
+					verticalDisplay.Characters[i-1] = i - 1 < displayText.Length ? displayText[i - 1] : ' ';
+				}
+				
+				yield return CoroutineYield.Sleep(frameDuration);
+			}
+			
+			verticalDisplay.SetString(displayText);
 		}
 		
 		#endregion
