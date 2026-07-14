@@ -193,7 +193,6 @@ namespace NeedyAugmentationMod {
 		const string UnchangedText = "UNCHANGED";
 		const string NoConfigText = "NO CONFIG";
 		const string StrikeText = "X*X*X*X*X";
-		const string PassText = "REFILLED ";
 		
 		static readonly Pair<Color, Color> introColors = Pair.New(
 			new Color(0.8f, 0.8f, 0.8f, 0.8f), 
@@ -345,15 +344,6 @@ namespace NeedyAugmentationMod {
 							);
 			yield return CoroutineYield.WaitPrevious;
 			yield return CoroutineYield.Sleep(frameDuration);
-			
-			for (int i = 0; i < 9; i++) {
-				if (i % 2 == 0) {
-					verticalDisplay.ClearString();
-				} else {
-					verticalDisplay.SetString(PassText);
-				}
-				yield return CoroutineYield.Sleep(frameDuration);
-			}
 			
 			// Reset
 			foreach (var @yield in WriteOutCurrentStateRoutine()) yield return @yield;
