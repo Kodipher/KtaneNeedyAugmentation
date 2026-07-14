@@ -101,7 +101,7 @@
                         To augment needy modules you need:
                         <ul>
                             <li>A single<sup>‡</sup> instance of Needy&nbsp;Augmentation on the bomb.</li>
-                            <li>A configuration in the mission description.</li>
+                            <li>A configuration in the mission description.<sup>§</sup></li>
                         </ul>
                     </li>
                     <li>Each needy module can be augmented independently.</li>
@@ -116,6 +116,10 @@
                     but they have to be on the same bomb.<br>
                     Yoo may need to use multiple Needy&nbsp;Augmentation modules in the same mission,
                     in cases of multiple bombs.
+                </p>
+                <p class="comment">
+                    § Dynamic Mission Generator places the whole mission source as the description.<br>
+                    Use a <code>/* */</code> comment to configure Needy&nbsp;Augmentation without format violations if you are using DMG.
                 </p>
 
                 <h3>Configuration</h3>
