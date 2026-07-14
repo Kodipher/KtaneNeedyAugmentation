@@ -21,9 +21,6 @@ namespace NeedyAugmentationMod {
 		
 		TextMesh Text { get; }
 		
-		Light[] LetterLights { get; }
-		readonly float maxLightIntensity;
-		
 		ModuleLogger Logger { get; }
 		
 		#endregion
@@ -51,18 +48,11 @@ namespace NeedyAugmentationMod {
 		/// <summary>In characters.</summary>
 		public double ColorLerpWaveDisplacement { get; set; } = 0;
 		
-		public VerticalDisplay(int size, TextMesh text, Light[] lights, ModuleLogger logger) {
+		public VerticalDisplay(int size, TextMesh text, ModuleLogger logger) {
 			
 			Size = size;
 			Text = text;
-			LetterLights = lights;
 			Logger = logger;
-
-			if (lights.Length != Size) {
-				throw new ArgumentException($"Lights count mismatch. Got {lights.Length}, expected {size}.");
-			}
-			
-			maxLightIntensity = lights[0].intensity;
 			
 			Characters = new char[Size];
 			for (int i = 0; i < Size; i++) {
@@ -84,21 +74,14 @@ namespace NeedyAugmentationMod {
 			
 			for (int i = 0; i < Size; i++) {
 
-				if (Characters[i] == ' ' || Characters[i] == '\0') {
-					LetterLights[i].intensity = 0;
-					
-				} else {
-
+				if (Characters[i] != ' ' && Characters[i] != '\0') {
 					float lerpSamplePos = (float)(i - ColorLerpWaveDisplacement).PosMod(ColorLerpWave.Width);
 					float lerpSample = ColorLerpWave.GetValueAt(lerpSamplePos);
 					Color letterColor = Color.Lerp(Colors.First, Colors.Second, lerpSample);
-					
-					sb.Append(FormatColoredCharacter(Characters[i], letterColor));
-					
-					LetterLights[i].color = letterColor;
-					LetterLights[i].intensity = letterColor.a * maxLightIntensity;
-				}
 
+					sb.Append(FormatColoredCharacter(Characters[i], letterColor));
+				}
+				
 				sb.Append('\n');
 			}
 			sb.Remove(sb.Length - 1, 1); // Remove last newline (end just on the displayed character)

@@ -73,6 +73,7 @@ namespace NeedyAugmentationMod {
 			// Display
 			var displayText = transform.Find("objectScaler/display/text").GetComponent<TextMesh>();
 
+			/*
 			var lightsTransform = transform.Find("objectScaler/display/lights");
 			var letterLights = Enumerable
 							.Range(0, lightsTransform.childCount)
@@ -82,8 +83,9 @@ namespace NeedyAugmentationMod {
 			foreach (var letterLight in letterLights) {
 				letterLight.range *= transform.lossyScale.x;
 			}
-
-			verticalDisplay = new VerticalDisplay(DisplayHeightCharacters, displayText, letterLights, logger);
+			*/
+			
+			verticalDisplay = new VerticalDisplay(DisplayHeightCharacters, displayText, logger);
 		}
 
 		#endregion
