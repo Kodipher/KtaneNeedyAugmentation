@@ -78,8 +78,8 @@
                 <h3>When Not Configured</h3>
                 <ul>
                     <li>The display will read <b>“NO CONFIG”</b>.</li>
-                    <li>When this module activates, a bar will appear and it will start to drain.</li>
-                    <li>Press the “Refill” button to deactivate the module.</li>
+                    <li>When this module activates, the display will show a draining bar.</li>
+                    <li>Press the “Refill” button before the bar is fully drained.</li>
                 </ul>
 
             </div>
@@ -174,8 +174,7 @@
                 <h4>Properties And Expressions</h4>
 
                 <ul>
-                    <li>The table below lists all possible properties.</li>
-                    <li>Every property is optional.</li>
+                    <li>The table below lists all possible properties. Every property is optional.</li>
                     <li>Seconds are based on the countdown timer.</li>
                     <li>Whitespace is not significant.</li>
                 </ul>
@@ -198,6 +197,7 @@
                                 <ul>
                                     <li>Overrides the initial activation time.</li>
                                     <li><code><i>seconds</i></code> is a positive integer or 0.</li>
+                                    <li>The needy still reacts to solves and strikes.</li>
                                 </ul>
                             </td>
                         </tr>
@@ -268,7 +268,7 @@
                                     <li>
                                         Prevents the module from activating, until either
                                         <code><i>modules</i></code> regular modules are solved
-                                        or <code><i>seconds</i></code> timer seconds pass.
+                                        or <code><i>seconds</i></code> seconds pass.
                                     </li>
                                     <li>The module behaves, as if the bomb was just started, afterwards.</li>
                                     <li>
