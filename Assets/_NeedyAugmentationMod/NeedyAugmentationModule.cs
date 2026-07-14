@@ -36,8 +36,8 @@ namespace NeedyAugmentationMod {
 		internal KMAudio kmAudio;
 		
 		// Module parts
-		internal Transform acknowledgeButton;
-		internal KMSelectable acknowledgeButtonSelectable;
+		internal Transform refillButton;
+		internal KMSelectable refillButtonSelectable;
 
 		const int DisplayHeightCharacters = 9;
 		internal VerticalDisplay verticalDisplay; // created
@@ -65,10 +65,10 @@ namespace NeedyAugmentationMod {
 			animationRunner = new AnimationRunner();
 			
 			// Button
-			acknowledgeButton = transform.Find("objectScaler/button");
+			refillButton = transform.Find("objectScaler/button");
 			
-			acknowledgeButtonSelectable = acknowledgeButton.GetComponent<KMSelectable>();
-			acknowledgeButtonSelectable.OnInteract += () => { OnButtonPress(); return false; };
+			refillButtonSelectable = refillButton.GetComponent<KMSelectable>();
+			refillButtonSelectable.OnInteract += () => { OnButtonPress(); return false; };
 			
 			// Display
 			var displayText = transform.Find("objectScaler/display/text").GetComponent<TextMesh>();
@@ -139,8 +139,8 @@ namespace NeedyAugmentationMod {
 		void OnButtonPress() {
 			
 			// Cue
-			kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, acknowledgeButton);
-			acknowledgeButtonSelectable.AddInteractionPunch(0.5f);
+			kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, refillButton);
+			refillButtonSelectable.AddInteractionPunch(0.5f);
 			animationRunner.Run(ButtonPressMovementRoutine());
 
 			// Logic
@@ -163,9 +163,9 @@ namespace NeedyAugmentationMod {
 		IEnumerable<CoroutineYield> ButtonPressMovementRoutine() {
 
 			System.Action<float> yPosSetter = yy => {
-				var position = acknowledgeButton.localPosition;
+				var position = refillButton.localPosition;
 				position.y += yy;
-				acknowledgeButton.localPosition = position;
+				refillButton.localPosition = position;
 			};
 
 			yield return new Shift1D(
