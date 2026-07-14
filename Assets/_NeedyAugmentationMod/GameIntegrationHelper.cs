@@ -88,7 +88,6 @@ namespace NeedyAugmentationMod {
 			
 		}
 		
-		/// <returns>IList&lt;NeedyComponent&gt;</returns>
 		public static NeedyComponentInfo[] GetAllNeedyComponentsOnTheSameBomb(GameObject bombComponentObject) {
 			
 			var bombComponentObjectComponent = bombComponentObject.GetComponent(bombComponentType);
