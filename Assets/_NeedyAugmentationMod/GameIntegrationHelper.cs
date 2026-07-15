@@ -6,17 +6,21 @@ using System.Linq;
 using System.Reflection;
 using Rephidock.GeneralUtilities.Reflection;
 
-using JetBrains.Annotations;
-
 using UnityEngine;
 
 
 namespace NeedyAugmentationMod {
 
-	public static class GameIntegrationHelper {
+	public static partial class GameIntegrationHelper {
 
 		static readonly Type sceneManagerType = ReflectionHelper.FindGameType("SceneManager");
 		static readonly Type localizationType = ReflectionHelper.FindGameType("Localization");
+		
+		static readonly Type bombComponentType = ReflectionHelper.FindGameType("BombComponent");
+		static readonly Type needyComponentType = ReflectionHelper.FindGameType("NeedyComponent");
+		static readonly Type needyCapacitorType = ReflectionHelper.FindGameType("NeedyDischargeComponent");
+		static readonly Type needyKnobType = ReflectionHelper.FindGameType("NeedyKnobComponent");
+		static readonly Type needyVentType = ReflectionHelper.FindGameType("NeedyVentComponent");
 		
 		public static string GetCurrentMissionDescription() {
 
@@ -32,60 +36,6 @@ namespace NeedyAugmentationMod {
 			string description = localizationType.CallMethod<string>("GetLocalizedString", null, descriptionTerm, defaultFixForRtl);
 
 			return description ?? "";
-		}
-
-		
-		static readonly Type bombComponentType = ReflectionHelper.FindGameType("BombComponent");
-		static readonly Type needyComponentType = ReflectionHelper.FindGameType("NeedyComponent");
-		static readonly Type needyCapacitorType = ReflectionHelper.FindGameType("NeedyDischargeComponent");
-		static readonly Type needyKnobType = ReflectionHelper.FindGameType("NeedyKnobComponent");
-		static readonly Type needyVentType = ReflectionHelper.FindGameType("NeedyVentComponent");
-		
-		public /*record*/ class NeedyComponentInfo {
-			
-			public MonoBehaviour NeedyComponent { get; }
-			[CanBeNull] public KMNeedyModule KmNeedy { get; }
-			public string ModuleId { get; }
-
-			public NeedyComponentInfo(MonoBehaviour needyComponent, KMNeedyModule kmNeedy) {
-				ModuleId = kmNeedy.ModuleType;
-				KmNeedy = kmNeedy;
-				NeedyComponent = needyComponent;
-			}
-			
-			public NeedyComponentInfo(MonoBehaviour needyComponent, string id) {
-				ModuleId = id;
-				KmNeedy = null;
-				NeedyComponent = needyComponent;
-			}
-
-			public static NeedyComponentInfo CreateFromNeedyComponent(MonoBehaviour needyComponent) {
-
-				// Mod needies
-				var maybeKmNeedy = needyComponent.GetComponent<KMNeedyModule>();
-
-				if (maybeKmNeedy != null) {
-					return new NeedyComponentInfo(needyComponent, maybeKmNeedy);
-				}
-				
-				// Vanilla needies
-				var type = needyComponent.GetType();
-
-				if (type.IsSubclassOrSelfOf(needyCapacitorType)) {
-					return new NeedyComponentInfo(needyComponent, "NeedyCapacitor");
-				}
-				
-				if (type.IsSubclassOrSelfOf(needyVentType)) {
-					return new NeedyComponentInfo(needyComponent, "NeedyVentGas");
-				}
-				
-				if (type.IsSubclassOrSelfOf(needyKnobType)) {
-					return new NeedyComponentInfo(needyComponent, "NeedyKnob");
-				}
-
-				throw new ArgumentException("Given component is not a needy.", nameof(needyComponent));
-			}
-			
 		}
 		
 		public static NeedyComponentInfo[] GetAllNeedyComponentsOnTheSameBomb(GameObject bombComponentObject) {
