@@ -58,6 +58,26 @@ namespace NeedyAugmentationMod {
 			return null;
 		}
 
+		#region /--- Parsing ---/
+
+		static readonly Regex singleLineConfigRegex = new Regex(@"\[NeedyAugmentation\](.*)$", RegexOptions.Multiline);
+		static readonly Regex multilineConfigRegex = new Regex(@"\[NeedyAugmentation\](.*)\[\/NeedyAugmentation\]", RegexOptions.Singleline);
+		
+		/// <summary>
+		/// Given a description, returns the config, without the tags,
+		/// or null if it does not exist.
+		/// </summary>
+		[CanBeNull] public static string ExtractConfigFromDescription(string description) {
+
+			Match multilineMatch = multilineConfigRegex.Match(description);
+			if (multilineMatch.Success) return multilineMatch.Groups[1].ToString().Trim();
+
+			Match singleLineMatch = singleLineConfigRegex.Match(description);
+			if (singleLineMatch.Success) return singleLineMatch.Groups[1].ToString().Trim();
+
+			return null;
+		}
+		
 	}
 
 }
