@@ -298,28 +298,28 @@ namespace NeedyAugmentationMod {
 		const string StrikeText = "X*X*X*X*X";
 		
 		static readonly Pair<Color, Color> introColors = Pair.New(
-			new Color(0.8f, 0.8f, 0.8f, 0.8f), 
+			new Color(0.8f, 0.8f, 0.8f), 
 			new Color(0.9f, 0.9f, 0.9f)
 		);
 		
 		static readonly Pair<Color, Color> noConfigColors = Pair.New(
-			new Color(0.8f, 0.8f, 0.0f, 0.8f), 
+			new Color(0.8f, 0.8f, 0.0f), 
 			new Color(0.9f, 0.9f, 0.4f)
 		);
 		
 		static readonly Pair<Color, Color> unchangedColors = Pair.New(
-			new Color(0.8f, 0.5f, 0.0f, 0.8f), 
-			new Color(0.9f, 0.6f, 0.4f)
+			new Color(0.8f, 0.6f, 0.0f), 
+			new Color(0.9f, 0.7f, 0.4f)
 		);
 		
 		static readonly Pair<Color, Color> errorColors = Pair.New(
-			new Color(1.0f, 0.2f, 0.0f, 0.8f), 
+			new Color(1.0f, 0.2f, 0.2f), 
 			new Color(1.0f, 0.5f, 0.5f)
 		);
 
 		static readonly Pair<Color, Color> augmentedColors = Pair.New(
 			new Color(0.2f, 1.0f, 0.2f), 
-			new Color(0.4f, 0.9f, 0.4f)
+			new Color(0.5f, 0.9f, 0.5f)
 		);
 		
 		static readonly char[] randomIntroCharacters = (
