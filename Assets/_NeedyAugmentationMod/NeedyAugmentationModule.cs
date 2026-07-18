@@ -239,6 +239,7 @@ namespace NeedyAugmentationMod {
 				ConfigHasError = false;
 				
 				// Apply config
+				logger.LogString("Augmenting...");
 				foreach (var needyInfo in allNeedyInfos) {
 					
 					if (needyInfo.KmNeedy == this.kmNeedyModule) continue; // Ignore itself
@@ -250,6 +251,10 @@ namespace NeedyAugmentationMod {
 
 					// todo: create component
 					IsAugmenting = true;
+				}
+
+				if (!IsAugmenting) {
+					logger.LogString("No module was augmented.");
 				}
 				
 			}
