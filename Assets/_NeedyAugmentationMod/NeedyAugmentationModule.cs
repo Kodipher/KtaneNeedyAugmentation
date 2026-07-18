@@ -298,7 +298,7 @@ namespace NeedyAugmentationMod {
 		const string StrikeText = "X*X*X*X*X";
 		
 		static readonly Pair<Color, Color> introColors = Pair.New(
-			new Color(0.8f, 0.8f, 0.8f), 
+			new Color(0.6f, 0.6f, 0.6f), 
 			new Color(0.9f, 0.9f, 0.9f)
 		);
 		
