@@ -72,17 +72,17 @@ namespace NeedyAugmentationMod {
 					
 					if (ActivationLimitSolves.HasValue) {
 						var formatPair = Pair.New(
-											"acts=*{0}{1}{2}/{3}", 
+											"acts={0}{1}{2}/{3}", 
 											new object[] { ActivationLimit.Value, sign, magnitude, ActivationLimitSolves.Value }
 										);
 						properties.Add(formatPair);
 					} else {
-						var formatPair = Pair.New("acts=*{0}{1}{2}", new object[] { ActivationLimit.Value, sign, magnitude });
+						var formatPair = Pair.New("acts={0}{1}{2}", new object[] { ActivationLimit.Value, sign, magnitude });
 						properties.Add(formatPair);
 					}
 
 				} else {
-					var formatPair = Pair.New("acts=*{0}", new object[] { ActivationLimit.Value });
+					var formatPair = Pair.New("acts={0}", new object[] { ActivationLimit.Value });
 					properties.Add(formatPair);
 				}
 			}
