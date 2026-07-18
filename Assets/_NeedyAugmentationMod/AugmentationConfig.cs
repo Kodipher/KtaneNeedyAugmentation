@@ -28,16 +28,15 @@ namespace NeedyAugmentationMod {
 			foreach (var propertySet in propertySets) {
 				
 				// Dupe id
-				List<AugmentationPropertySet> dupe;
-				if (propertiesById.TryGetValue(propertySet.ModuleId, out dupe)) {
-					dupe.Add(propertySet);
+				List<AugmentationPropertySet> dupes;
+				if (propertiesById.TryGetValue(propertySet.ModuleId, out dupes)) {
+					dupes.Add(propertySet);
 					continue;
 				}
 				
 				// New id
-				propertiesById.Add(propertySet.ModuleId, new List<AugmentationPropertySet>());
+				propertiesById.Add(propertySet.ModuleId, new List<AugmentationPropertySet>() { propertySet });
 				nextIndexToAssignById.Add(propertySet.ModuleId, 0);
-				
 			}
 		}
 		
