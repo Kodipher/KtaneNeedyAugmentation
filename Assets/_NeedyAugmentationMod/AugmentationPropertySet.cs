@@ -35,22 +35,32 @@ namespace NeedyAugmentationMod {
 
 		public string ToStringSkipId() {
 			
-			List<FormattableString> properties = new List<FormattableString>(capacity: 5);
+			// Unfortunately, FormattableString is not a thing in netframework35
+			
+			List<Pair<string, object[]>> properties = new List<Pair<string, object[]>>(capacity: 5);
 
 			if (InitialActivationTime.HasValue) {
-				properties.Add($"acttime={InitialActivationTime.Value.TotalSeconds}");
+				var formatPair = Pair.New("acttime={0}", new object[] { InitialActivationTime.Value.TotalSeconds });
+				properties.Add(formatPair);
 			}
 			
 			if (CooldownMultiplier.HasValue && !CooldownAddend.HasValue) {
-				properties.Add($"cd=*{CooldownMultiplier.Value}");
+				var formatPair = Pair.New("cd=*{0}", new object[] { CooldownMultiplier.Value });
+				properties.Add(formatPair);
+				
 			} else if (!CooldownMultiplier.HasValue && CooldownAddend.HasValue) {
 				char sign = CooldownAddend.Value >= 0 ? '+' : '-';
 				float magnitude = Math.Abs(CooldownAddend.Value);
-				properties.Add($"cd={sign}{magnitude}");
+				
+				var formatPair = Pair.New("cd={0}{1}", new object[] { sign, magnitude });
+				properties.Add(formatPair);
+				
 			} else if (CooldownMultiplier.HasValue && CooldownAddend.HasValue) {
 				char sign = CooldownAddend.Value >= 0 ? '+' : '-';
 				float magnitude = Math.Abs(CooldownAddend.Value);
-				properties.Add($"cd=*{CooldownMultiplier.Value}{sign}{magnitude}");
+				
+				var formatPair = Pair.New("cd=*{0}{1}{2}", new object[] { CooldownMultiplier.Value, sign, magnitude });
+				properties.Add(formatPair);
 			}
 
 			if (ActivationLimit.HasValue) {
@@ -61,42 +71,54 @@ namespace NeedyAugmentationMod {
 					int magnitude = Math.Abs(ActivationLimitAddendPerSolves.Value);
 					
 					if (ActivationLimitSolves.HasValue) {
-						properties.Add($"acts=*{ActivationLimit.Value}{sign}{magnitude}/{ActivationLimitSolves.Value}");
+						var formatPair = Pair.New(
+											"acts=*{0}{1}{2}/{3}", 
+											new object[] { ActivationLimit.Value, sign, magnitude, ActivationLimitSolves.Value }
+										);
+						properties.Add(formatPair);
 					} else {
-						properties.Add($"acts=*{ActivationLimit.Value}{sign}{magnitude}");
+						var formatPair = Pair.New("acts=*{0}{1}{2}", new object[] { ActivationLimit.Value, sign, magnitude });
+						properties.Add(formatPair);
 					}
 
 				} else {
-					properties.Add($"acts=*{ActivationLimit.Value}");
+					var formatPair = Pair.New("acts=*{0}", new object[] { ActivationLimit.Value });
+					properties.Add(formatPair);
 				}
 			}
 
 			if (StartThresholdSeconds.HasValue) {
-				properties.Add($"start={StartThresholdSeconds.Value.TotalSeconds}s");
+				var formatPair = Pair.New("start={0}s", new object[] { StartThresholdSeconds.Value.TotalSeconds });
+				properties.Add(formatPair);
 			}
 			
 			if (StartThresholdModules.HasValue) {
-				properties.Add($"start={StartThresholdModules.Value}m");
+				var formatPair = Pair.New("start={0}m", new object[] { StartThresholdModules.Value });
+				properties.Add(formatPair);
 			}
 
 			if (StopThresholdSeconds.HasValue) {
-				properties.Add($"stop={StopThresholdSeconds.Value.TotalSeconds}s");
+				var formatPair = Pair.New("stop={0}s", new object[] { StopThresholdSeconds.Value.TotalSeconds });
+				properties.Add(formatPair);
 			}
 			
 			if (StopThresholdModules.HasValue) {
-				properties.Add($"stop={StopThresholdModules.Value}m");
+				var formatPair = Pair.New("stop={0}m", new object[] { StopThresholdModules.Value });
+				properties.Add(formatPair);
 			}
 			
 			if (TerminationThresholdSeconds.HasValue) {
-				properties.Add($"term={TerminationThresholdSeconds.Value.TotalSeconds}s");
+				var formatPair = Pair.New("term={0}s", new object[] { TerminationThresholdSeconds.Value.TotalSeconds });
+				properties.Add(formatPair);
 			}
 			
 			if (TerminationThresholdModules.HasValue) {
-				properties.Add($"term={TerminationThresholdModules.Value}m");
+				var formatPair = Pair.New("term={0}m", new object[] { TerminationThresholdModules.Value });
+				properties.Add(formatPair);
 			}
 
 			return properties
-					.Select(formattableString => formattableString.ToString(CultureInfo.InvariantCulture))
+					.Select(pair => string.Format(CultureInfo.InvariantCulture, pair.First, pair.Second))
 					.JoinString(",");
 		}
 		
