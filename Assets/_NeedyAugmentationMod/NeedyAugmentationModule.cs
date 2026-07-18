@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,8 +10,6 @@ using Rephidock.GeneralUtilities.Randomness;
 
 using SharedAssets.Utils;
 
-using TimeSpan = System.TimeSpan;
-
 
 namespace NeedyAugmentationMod {
 
@@ -20,7 +19,16 @@ namespace NeedyAugmentationMod {
 	public class NeedyAugmentationModule : MonoBehaviour {
 
 		#region /--- State ---/
+		
+		static readonly object creatingAugmentationsLock = new object();
 
+		public bool IsConfigurationHandledByAnother { get; private set; } = false;
+		
+		public bool IsConfigured { get; private set; } = false; // Overrules IsAugmenting
+		public bool IsAugmenting { get; private set; } = false;
+		public bool ConfigHasError { get; private set; } = false;
+		
+		
 		bool isNeedyRunning = false;
 		
 		// Expose log id for LFA at module instance (required by Tweaks)
@@ -96,6 +104,8 @@ namespace NeedyAugmentationMod {
 			PrepareComponents();
 			animationRunner.Run(FixTimerPositionRoutine());
 			animationRunner.Run(RandomCharacterFlashInfiniteRoutine());
+
+			HandleConfiguration();
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
@@ -153,6 +163,96 @@ namespace NeedyAugmentationMod {
 			kmNeedyModule.HandlePass();
 			OnNeedyDeactivation(); // need to deactivate manually because... that is how the proxy works
 			animationRunner.Run(PassRoutine(solveAtTime));
+		}
+
+		#endregion
+
+		#region /--- Create Augmentations ---/
+
+		void HandleConfiguration() {
+			
+			lock (creatingAugmentationsLock) {
+				
+				if (IsConfigurationHandledByAnother) {
+					logger.LogString("Configuration is handled by another instance. Acting like not configured.");
+					IsConfigured = false;
+					return;
+				}
+
+				var allNeedyInfos = GameIntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
+				
+				// Prevent duplicate config reads, prevent self from activating
+				foreach (var needyInfo in allNeedyInfos) {
+
+					if (needyInfo.KmNeedy == null) continue; // vanilla needies
+					if (needyInfo.KmNeedy.ModuleType != kmNeedyModule.ModuleType) continue; // not needy augmentation
+					if (needyInfo.KmNeedy == this.kmNeedyModule) continue; // this
+
+					needyInfo.KmNeedy.GetComponent<NeedyAugmentationModule>().IsConfigurationHandledByAnother = true;
+				}
+				
+				// Read config
+				string description;
+				logger.LogString("Checking configuration...");
+				try {
+					description = GameIntegrationHelper.GetCurrentMissionDescription();
+				} catch (NotSupportedException) {
+					logger.LogString("Configurations are not supported in TestHarness.");
+					IsConfigured = false;
+					return;
+				} catch (NullReferenceException ex) {
+					logger.LogString("Filed to read mission description.");
+					logger.LogException(ex);
+					IsConfigured = false;
+					return;
+				}
+
+				string maybeConfig = AugmentationConfig.ExtractConfigFromDescription(description);
+
+				if (maybeConfig == null) {
+					logger.LogString("No configuration found.");
+					IsConfigured = false;
+					return;
+				}
+				
+				// Prevent self from activating
+				// todo
+
+				// Parse config
+				AugmentationConfig config;
+				try {
+					config = AugmentationConfig.ParseConfigOrThrow(maybeConfig);
+				} catch (FormatException ex) {
+					logger.LogString($"Configuration has a format error: {ex.Message}");
+					IsConfigured = true;
+					IsAugmenting = false;
+					ConfigHasError = true;
+					return;
+				}
+				
+				logger.LogString("Configuration:");
+				foreach (var propertySet in config.PropertySets) {
+					logger.LogString(propertySet.ToString());
+				}
+				
+				IsConfigured = true;
+				IsAugmenting = false; // to be overwritten
+				ConfigHasError = false;
+				
+				// Apply config
+				foreach (var needyInfo in allNeedyInfos) {
+
+					var maybePropertySet = config.AssignPropertySet(needyInfo.ModuleId);
+					if (maybePropertySet == null) continue;
+					
+					logger.LogString($"{needyInfo.ModuleId} has been augmented with \"{maybePropertySet.ToStringSkipId()}\"");
+
+					// todo: create component
+					IsAugmenting = true;
+				}
+				
+			}
+			
 		}
 
 		#endregion
@@ -352,10 +452,24 @@ namespace NeedyAugmentationMod {
 		}
 		
 		public IEnumerable<CoroutineYield> WriteOutCurrentStateRoutine(bool setColor = true) {
-			
-			// todo
-			string displayText = NoConfigText;
-			var displayColor = noConfigColors;
+
+			// Pick correct text and colors
+			string displayText;
+			Pair<Color, Color> displayColor;
+
+			if (!IsConfigured) {
+				displayText = NoConfigText;
+				displayColor = noConfigColors;
+			} else if (ConfigHasError) {
+				displayText = UnchangedText;
+				displayColor = errorColors;
+			} else if (IsAugmenting) {
+				displayText = AugmentedText;
+				displayColor = augmentedColors;
+			} else {
+				displayText = UnchangedText;
+				displayColor = unchangedColors;
+			}
 			
 			// Animate
 			if (setColor) {
