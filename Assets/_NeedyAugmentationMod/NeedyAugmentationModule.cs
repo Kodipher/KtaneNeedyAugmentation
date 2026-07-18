@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Rephidock.GeneralUtilities.Collections;
 using Rephidock.AtomicAnimations;
@@ -232,7 +231,7 @@ namespace NeedyAugmentationMod {
 				
 				logger.LogString("Configuration:");
 				foreach (var propertySet in config.PropertySets) {
-					logger.LogString(propertySet.ToString());
+					logger.LogString($"{propertySet};");
 				}
 				
 				IsConfigured = true;
@@ -241,7 +240,9 @@ namespace NeedyAugmentationMod {
 				
 				// Apply config
 				foreach (var needyInfo in allNeedyInfos) {
-
+					
+					if (needyInfo.KmNeedy == this.kmNeedyModule) continue; // Ignore itself
+					
 					var maybePropertySet = config.AssignPropertySet(needyInfo.ModuleId);
 					if (maybePropertySet == null) continue;
 					
