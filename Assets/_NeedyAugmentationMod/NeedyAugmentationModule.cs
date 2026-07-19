@@ -215,7 +215,8 @@ namespace NeedyAugmentationMod {
 				}
 				
 				// Prevent self from activating
-				// todo
+				var noActivationProps = new AugmentationPropertySet() { ModuleId = kmNeedyModule.ModuleType, ActivationLimit = 0 };
+				AugmentedActivatorComponent.CreateForAndCache(this.gameObject, noActivationProps);
 
 				// Parse config
 				AugmentationConfig config;
@@ -249,7 +250,7 @@ namespace NeedyAugmentationMod {
 					
 					logger.LogString($"{needyInfo.ModuleId} has been augmented with \"{maybePropertySet.ToStringSkipId()}\"");
 
-					// todo: create component
+					AugmentedActivatorComponent.CreateForAndCache(needyInfo.NeedyComponent.gameObject, maybePropertySet);
 					IsAugmenting = true;
 				}
 
