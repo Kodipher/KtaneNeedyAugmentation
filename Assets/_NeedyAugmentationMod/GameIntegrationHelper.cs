@@ -40,6 +40,8 @@ namespace NeedyAugmentationMod {
 		
 		public static NeedyComponentInfo[] GetAllNeedyComponentsOnTheSameBomb(GameObject bombComponentObject) {
 			
+			if (Application.isEditor) throw new NotSupportedException();
+			
 			var bombComponentObjectComponent = bombComponentObject.GetComponent(bombComponentType);
 			var bomb = bombComponentType.GetValue<object>("Bomb", bombComponentObjectComponent);
 			var componentList = bomb.GetType().GetValue<IList>("BombComponents", bomb);

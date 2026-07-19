@@ -177,6 +177,12 @@ namespace NeedyAugmentationMod {
 					IsConfigured = false;
 					return;
 				}
+
+				if (Application.isEditor) {
+					logger.LogString("Testing in TestHarness is not fully supported.");
+					IsConfigured = false;
+					return;
+				}
 				
 				var allNeedyInfos = GameIntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
 				
@@ -195,10 +201,6 @@ namespace NeedyAugmentationMod {
 				logger.LogString("Checking configuration...");
 				try {
 					description = GameIntegrationHelper.GetCurrentMissionDescription();
-				} catch (NotSupportedException) {
-					logger.LogString("Configurations are not supported in TestHarness.");
-					IsConfigured = false;
-					return;
 				} catch (NullReferenceException ex) {
 					logger.LogString("Filed to read mission description.");
 					logger.LogException(ex);
