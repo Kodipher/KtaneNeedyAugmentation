@@ -177,10 +177,10 @@ namespace NeedyAugmentationMod {
 					IsConfigured = false;
 					return;
 				}
-
+				
 				var allNeedyInfos = GameIntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
 				
-				// Prevent duplicate config reads, prevent self from activating
+				// Prevent duplicate config reads
 				foreach (var needyInfo in allNeedyInfos) {
 
 					if (needyInfo.KmNeedy == null) continue; // vanilla needies
@@ -213,6 +213,10 @@ namespace NeedyAugmentationMod {
 					IsConfigured = false;
 					return;
 				}
+				
+				// Ensure patch; clean dead cache
+				// todo: ensure patch
+				AugmentedActivatorComponent.ClearDeadCacheReferences();
 				
 				// Prevent self from activating
 				var noActivationProps = new AugmentationPropertySet() { ModuleId = kmNeedyModule.ModuleType, ActivationLimit = 0 };
