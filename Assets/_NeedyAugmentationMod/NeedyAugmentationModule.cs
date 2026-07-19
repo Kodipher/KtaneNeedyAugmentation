@@ -389,6 +389,11 @@ namespace NeedyAugmentationMod {
 
 			verticalDisplay.ClearString();
 			
+			// Faulty config strike sound
+			if (IsConfigured && ConfigHasError) {
+				kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.Strike, transform);
+			}
+			
 			// Set correct display
 			foreach (var @yield in WriteOutCurrentStateRoutine()) yield return @yield;
 		}
