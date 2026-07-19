@@ -62,7 +62,6 @@
                     <li>The display will read <b>“AUGMENTED”</b>, if augmentations are in effect.</li>
                     <li>The display will read <b>“UNCHANGED”</b> otherwise.</li>
                     <li>Needy&nbsp;Augmentation itself will never activate.</li>
-                    <li>A special sound also plays when the bomb starts.<sup>†</sup></li>
                     <li>
                         Only 1 Needy&nbsp;Augmentation can behave like this on each bomb. 
                         Every other instance of Needy&nbsp;Augmentation will behave like it is not configured.
@@ -70,7 +69,7 @@
                 </ul>
 
                 <p class="comment">
-                    † If the configuration has an error, it is logged and a strike sound also plays.<br>
+                    If the configuration has an error, it is logged and a strike sound also plays.<br>
                     No actual strike is recorded and no augmentations are made,
                     however the module will still not activate.
                 </p>
@@ -100,8 +99,8 @@
                     <li>
                         To augment needy modules you need:
                         <ul>
-                            <li>A single<sup>‡</sup> instance of Needy&nbsp;Augmentation on the bomb.</li>
-                            <li>A configuration in the mission description.<sup>§</sup></li>
+                            <li>A single<sup>†</sup> instance of Needy&nbsp;Augmentation on the bomb.</li>
+                            <li>A configuration in the mission description.<sup>‡</sup></li>
                         </ul>
                     </li>
                     <li>Each needy module can be augmented independently.</li>
@@ -112,13 +111,13 @@
                     </li>
                 </ul>
                 <p class="comment">
-                    ‡ One Needy&nbsp;Augmentation module can augment multiple needy modules, 
+                    † One Needy&nbsp;Augmentation module can augment multiple needy modules, 
                     but they have to be on the same bomb.<br>
                     Yoo may need to use multiple Needy&nbsp;Augmentation modules in the same mission,
                     in cases of multiple bombs.
                 </p>
                 <p class="comment">
-                    § Dynamic Mission Generator places the whole mission source as the description.<br>
+                    ‡ Dynamic Mission Generator places the whole mission source as the description.<br>
                     Use a <code>/* */</code> comment to configure Needy&nbsp;Augmentation without format violations if you are using DMG.
                 </p>
 
