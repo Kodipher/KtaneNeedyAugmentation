@@ -12,6 +12,14 @@ using UnityEngine;
 namespace NeedyAugmentationMod {
 
 	public static partial class IntegrationHelper {
+		
+		//
+		// I did not want to import the game's assembly, 
+		// because of potential issues with Rewritten later.
+		//
+		// Rewritten compatibility will habe to be added either way,
+		// but at least I am not relying on the original game's dll.
+		//
 
 		static readonly Type sceneManagerType = ReflectionHelper.FindGameType("SceneManager");
 		static readonly Type localizationType = ReflectionHelper.FindGameType("Localization");
