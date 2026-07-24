@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-using System.Reflection;
+using Rephidock.GeneralUtilities.Collections;
 using Rephidock.GeneralUtilities.Reflection;
 
 using UnityEngine;
@@ -21,6 +21,11 @@ namespace NeedyAugmentationMod {
 		static readonly Type needyCapacitorType = ReflectionHelper.FindGameType("NeedyDischargeComponent");
 		static readonly Type needyKnobType = ReflectionHelper.FindGameType("NeedyKnobComponent");
 		static readonly Type needyVentType = ReflectionHelper.FindGameType("NeedyVentComponent");
+		
+		static Lazy<IDictionary<string, object>> moddedApi = 
+								new Lazy<IDictionary<string, object>>(
+									() => GameObject.Find("ModdedAPI_Info").GetComponent<IDictionary<string, object>>()
+								);
 		
 		public static string GetCurrentMissionDescription() {
 
@@ -62,6 +67,32 @@ namespace NeedyAugmentationMod {
 
 		public static float GetTimeRate(object timerComponent) {
 			return timerComponent.CallMethod<float>("GetRate");
+		}
+
+		// Has to be done through the api object,
+		// because the check is not done in a module component
+		public static bool IsZenMode() {
+			if (moddedApi.Value == null) return false;
+
+			object isZenMode;
+			if (moddedApi.Value.TryGetValue("ZenMode", out isZenMode)) {
+				if (isZenMode is bool) return (bool)isZenMode;
+				return false;
+			}
+
+			return false;
+		}
+		
+		public static bool IsTimeMode() {
+			if (moddedApi.Value == null) return false;
+
+			object isTimeMode;
+			if (moddedApi.Value.TryGetValue("TimeMode", out isTimeMode)) {
+				if (isTimeMode is bool) return (bool)isTimeMode;
+				return false;
+			}
+
+			return false;
 		}
 		
 	}

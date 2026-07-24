@@ -81,9 +81,39 @@ namespace NeedyAugmentationMod {
 		}
 		
 		#endregion
-	
-		public AugmentationPropertySet Settings { get; private set; }
 		
+		public AugmentationPropertySet Settings { get; private set; }
+
+		public int TimesActivated { get; private set; } = 0;
+		
+		int? GetActivationLimitForSolves(int solves) {
+
+			int? settingBase = Settings.ActivationLimit;
+			int? settingPer = Settings.ActivationLimitAddendPerSolves;
+			int? settingSolves = Settings.ActivationLimitSolves;
+			
+			if (!settingBase.HasValue) return null; // inf
+			if (!settingPer.HasValue) return settingBase; // base
+			if (!settingSolves.HasValue) return settingBase.Value + solves * settingPer.Value; // base + perSolve
+
+			if (settingSolves.Value == 0) {
+				if (settingPer.Value == 0) return settingBase; // base+0 (assumes 0/0 is 0)
+				if (settingPer.Value < 0) return 0; // base-inf (assumes -x/0 is -inf)
+				return null; // base+inf (assumes x/0 is inf)
+			}
+			
+			return settingBase.Value + (solves / settingSolves.Value) * settingPer.Value; // base + per/solves
+		}
+
+		/// <returns>seconds</returns>
+		float ModifyCooldown(float cooldownSeconds) {
+			float result = cooldownSeconds;
+			if (Settings.CooldownMultiplier.HasValue) result *= Settings.CooldownMultiplier.Value;
+			if (Settings.CooldownAddend.HasValue) result += Settings.CooldownAddend.Value;
+			if (result <= 0) return 0;
+			return result;
+		}
+
 	}
 	
 }
