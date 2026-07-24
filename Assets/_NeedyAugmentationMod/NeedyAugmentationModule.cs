@@ -25,7 +25,7 @@ namespace NeedyAugmentationMod {
 		
 		public bool IsConfigured { get; private set; } = false;
 		public bool IsAugmenting { get; private set; } = false;
-		public bool ConfigHasError { get; private set; } = false;
+		public bool ConfigOrModuleHasError { get; private set; } = false;
 		
 		
 		bool isNeedyRunning = false;
@@ -181,7 +181,7 @@ namespace NeedyAugmentationMod {
 				if (Application.isEditor) {
 					logger.LogString("Testing in TestHarness is not fully supported.");
 					IsConfigured = false;
-					ConfigHasError = true;
+					ConfigOrModuleHasError = true;
 					return;
 				}
 				
@@ -202,11 +202,15 @@ namespace NeedyAugmentationMod {
 				logger.LogString("Checking configuration...");
 				try {
 					description = GameIntegrationHelper.GetCurrentMissionDescription();
-				} catch (NullReferenceException ex) {
-					logger.LogString("Filed to read mission description.");
-					logger.LogException(ex);
-					IsConfigured = false;
-					return;
+				} catch (Exception ex) {
+					if (ex is NullReferenceException || ex is System.Reflection.TargetParameterCountException) {
+						logger.LogString("Filed to read mission description.");
+						logger.LogException(ex);
+						IsConfigured = false;
+						ConfigOrModuleHasError = true;
+						return;
+					}
+					throw;
 				}
 
 				string maybeConfig = AugmentationConfig.ExtractConfigFromDescription(description);
@@ -233,7 +237,7 @@ namespace NeedyAugmentationMod {
 					logger.LogString($"Configuration has a format error: {ex.Message}");
 					IsConfigured = true;
 					IsAugmenting = false;
-					ConfigHasError = true;
+					ConfigOrModuleHasError = true;
 					return;
 				}
 				
@@ -244,7 +248,7 @@ namespace NeedyAugmentationMod {
 				
 				IsConfigured = true;
 				IsAugmenting = false; // to be overwritten
-				ConfigHasError = false;
+				ConfigOrModuleHasError = false;
 				
 				// Apply config
 				logger.LogString("Augmenting...");
@@ -398,7 +402,7 @@ namespace NeedyAugmentationMod {
 			verticalDisplay.ClearString();
 			
 			// Faulty config strike sound
-			if (IsConfigured && ConfigHasError) {
+			if (IsConfigured && ConfigOrModuleHasError) {
 				kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.Strike, transform);
 			}
 			
@@ -487,7 +491,7 @@ namespace NeedyAugmentationMod {
 				displayColor = unchangedColors;
 			}
 
-			if (ConfigHasError) {
+			if (ConfigOrModuleHasError) {
 				displayColor = errorColors;
 			}
 			
