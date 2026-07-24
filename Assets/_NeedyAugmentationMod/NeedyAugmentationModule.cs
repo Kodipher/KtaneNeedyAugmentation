@@ -100,8 +100,11 @@ namespace NeedyAugmentationMod {
 
 		#region /--- Events ---/
 
-		void Start() {
+		void Awake() {
 			PrepareComponents();
+		}
+
+		void Start() {
 			animationRunner.Run(FixTimerPositionRoutine());
 			animationRunner.Run(RandomCharacterFlashInfiniteRoutine());
 
