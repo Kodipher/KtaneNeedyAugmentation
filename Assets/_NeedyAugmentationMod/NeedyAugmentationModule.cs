@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Rephidock.GeneralUtilities.Collections;
 using Rephidock.AtomicAnimations;
@@ -190,9 +191,9 @@ namespace NeedyAugmentationMod {
 				}
 				
 				// Find all needies
-				IntegrationHelper.NeedyComponentProxy[] allNeedyInfos;
+				IntegrationHelper.NeedyComponentProxy[] allNeedies;
 				try {
-					allNeedyInfos = IntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
+					allNeedies = IntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
 				} catch (Exception ex) {
 					logger.LogString("Failed to find all needies.");
 					logger.LogException(ex);
@@ -203,7 +204,7 @@ namespace NeedyAugmentationMod {
 				}
 				
 				// Prevent duplicate config reads
-				foreach (var needyInfo in allNeedyInfos) {
+				foreach (var needyInfo in allNeedies) {
 
 					if (needyInfo.KmNeedy == null) continue; // vanilla needies
 					if (needyInfo.KmNeedy.ModuleType != kmNeedyModule.ModuleType) continue; // not NeedyAugmentation
@@ -248,8 +249,9 @@ namespace NeedyAugmentationMod {
 				}
 				
 				// Prevent self from activating
+				var selfProxy = allNeedies.First(proxy => proxy.KmNeedy == kmNeedyModule);
 				var noActivationProps = new AugmentationPropertySet() { ModuleId = kmNeedyModule.ModuleType, ActivationLimit = 0 };
-				AugmentedActivatorComponent.CreateForAndCache(this.gameObject, noActivationProps);
+				AugmentedActivatorComponent.CreateForAndCache(selfProxy, noActivationProps);
 
 				// Parse config
 				AugmentationConfig config;
@@ -274,7 +276,7 @@ namespace NeedyAugmentationMod {
 				
 				// Apply config
 				logger.LogString("Augmenting...");
-				foreach (var needyInfo in allNeedyInfos) {
+				foreach (var needyInfo in allNeedies) {
 					
 					if (needyInfo.KmNeedy == this.kmNeedyModule) continue; // Ignore itself
 					
@@ -283,7 +285,7 @@ namespace NeedyAugmentationMod {
 					
 					logger.LogString($"{needyInfo.ModuleId} has been augmented with \"{maybePropertySet.ToStringSkipId()}\"");
 
-					AugmentedActivatorComponent.CreateForAndCache(needyInfo.NeedyComponent.gameObject, maybePropertySet);
+					AugmentedActivatorComponent.CreateForAndCache(needyInfo, maybePropertySet);
 					IsAugmenting = true;
 				}
 

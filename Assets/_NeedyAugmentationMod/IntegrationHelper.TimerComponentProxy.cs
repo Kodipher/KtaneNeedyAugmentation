@@ -36,7 +36,7 @@ namespace NeedyAugmentationMod {
 				return getRateMethod();
 			}
 			
-			public bool GetIsUpdating(object timerComponent) {
+			public bool GetIsUpdating() {
 				
 				if (isUpdatingPropertyGetter == null) {
 					var methodInfo = TimerComponent.GetType().GetProperty("IsUpdating")?.GetGetMethod();

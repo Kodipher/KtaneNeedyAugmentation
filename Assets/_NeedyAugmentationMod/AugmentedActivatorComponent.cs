@@ -68,11 +68,17 @@ namespace NeedyAugmentationMod {
 			}
 		}
 		
-		public static AugmentedActivatorComponent CreateForAndCache(GameObject gameObject, AugmentationPropertySet augmentation) {
+		public static AugmentedActivatorComponent CreateForAndCache(
+			IntegrationHelper.NeedyComponentProxy needyProxy, 
+			AugmentationPropertySet augmentation
+		) {
 			lock (cacheDictLock) {
+
+				var gameObject = needyProxy.NeedyComponent.gameObject;
 				
 				var component = gameObject.AddComponent<AugmentedActivatorComponent>();
 				component.Settings = augmentation;
+				component.NeedyComponent = needyProxy;
 				
 				int id = gameObject.GetInstanceID();
 				instanceCache[id] = new WeakReference(component);
@@ -113,6 +119,15 @@ namespace NeedyAugmentationMod {
 			if (Settings.CooldownAddend.HasValue) result += Settings.CooldownAddend.Value;
 			if (result <= 0) return 0;
 			return result;
+		}
+
+		
+		public IntegrationHelper.NeedyComponentProxy NeedyComponent { get; private set; }
+		public IntegrationHelper.TimerComponentProxy TimerComponent { get; private set; }
+
+		public void Start() {
+			var needyGameObject = NeedyComponent.NeedyComponent.gameObject;
+			TimerComponent = IntegrationHelper.TimerComponentProxy.CreateFromComponentOnTheSameBomb(needyGameObject);
 		}
 
 	}
