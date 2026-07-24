@@ -191,17 +191,11 @@ namespace NeedyAugmentationMod {
 				try {
 					allNeedyInfos = GameIntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
 				} catch (Exception ex) {
-					if (
-						ex is NullReferenceException || 
-						ex is InvalidCastException ||
-						ex is System.Reflection.TargetParameterCountException
-					) {
-						logger.LogString("Filed to find all needies.");
-						logger.LogException(ex);
-						IsConfigured = false;
-						ModuleHasError = true;
-						return;
-					}
+					logger.LogString("Failed to find all needies.");
+					logger.LogException(ex);
+					IsConfigured = false;
+					ModuleHasError = true;
+					//return;
 					throw;
 				}
 				
@@ -220,17 +214,11 @@ namespace NeedyAugmentationMod {
 				try {
 					description = GameIntegrationHelper.GetCurrentMissionDescription();
 				} catch (Exception ex) {
-					if (
-						ex is NullReferenceException || 
-						ex is InvalidCastException ||
-						ex is System.Reflection.TargetParameterCountException
-					) {
-						logger.LogString("Filed to read mission description.");
-						logger.LogException(ex);
-						IsConfigured = false;
-						ModuleHasError = true;
-						return;
-					}
+					logger.LogString("Filed to read mission description.");
+					logger.LogException(ex);
+					IsConfigured = false;
+					ModuleHasError = true;
+					//return;
 					throw;
 				}
 
