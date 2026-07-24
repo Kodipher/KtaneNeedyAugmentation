@@ -190,9 +190,9 @@ namespace NeedyAugmentationMod {
 				}
 				
 				// Find all needies
-				GameIntegrationHelper.NeedyComponentInfo[] allNeedyInfos;
+				IntegrationHelper.NeedyComponentInfo[] allNeedyInfos;
 				try {
-					allNeedyInfos = GameIntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
+					allNeedyInfos = IntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
 				} catch (Exception ex) {
 					logger.LogString("Failed to find all needies.");
 					logger.LogException(ex);
@@ -215,7 +215,7 @@ namespace NeedyAugmentationMod {
 				// Read config
 				string description;
 				try {
-					description = GameIntegrationHelper.GetCurrentMissionDescription();
+					description = IntegrationHelper.GetCurrentMissionDescription();
 				} catch (Exception ex) {
 					logger.LogString("Filed to read mission description.");
 					logger.LogException(ex);
@@ -237,7 +237,7 @@ namespace NeedyAugmentationMod {
 				AugmentedActivatorComponent.ClearDeadCacheReferences();
 				
 				try {
-					GameIntegrationHelper.Patcher.EnsurePatched();
+					IntegrationHelper.Patcher.EnsurePatched();
 				} catch (Exception ex) {
 					logger.LogString("Failed to apply the Harmony patch.");
 					logger.LogException(ex);

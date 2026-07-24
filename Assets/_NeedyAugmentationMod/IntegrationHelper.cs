@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace NeedyAugmentationMod {
 
-	public static partial class GameIntegrationHelper {
+	public static partial class IntegrationHelper {
 
 		static readonly Type sceneManagerType = ReflectionHelper.FindGameType("SceneManager");
 		static readonly Type localizationType = ReflectionHelper.FindGameType("Localization");

@@ -4,7 +4,7 @@ using HarmonyLib;
 
 namespace NeedyAugmentationMod {
 
-	public static partial class GameIntegrationHelper {
+	public static partial class IntegrationHelper {
 		public static class Patcher {
 
 			public const string HarmonyId = "kodipher.NeedyAugmentation";

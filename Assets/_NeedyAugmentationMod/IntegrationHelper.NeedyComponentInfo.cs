@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace NeedyAugmentationMod {
 
-	public static partial class GameIntegrationHelper {
+	public static partial class IntegrationHelper {
 		public /*record*/ class NeedyComponentInfo {
 			
 			public MonoBehaviour NeedyComponent { get; }
