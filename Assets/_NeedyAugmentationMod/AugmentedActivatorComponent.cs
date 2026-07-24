@@ -13,6 +13,7 @@ namespace NeedyAugmentationMod {
 
 		static readonly object cacheDictLock = new object();
 
+		// Keys: object ids, the components are attached to
 		static readonly Dictionary<int, WeakReference> instanceCache = new Dictionary<int, WeakReference>();
 
 		public static void ClearDeadCacheReferences() {

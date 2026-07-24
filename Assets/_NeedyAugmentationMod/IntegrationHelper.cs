@@ -22,7 +22,7 @@ namespace NeedyAugmentationMod {
 		static readonly Type needyKnobType = ReflectionHelper.FindGameType("NeedyKnobComponent");
 		static readonly Type needyVentType = ReflectionHelper.FindGameType("NeedyVentComponent");
 		
-		static Lazy<IDictionary<string, object>> moddedApi = 
+		static readonly Lazy<IDictionary<string, object>> moddedApi = 
 								new Lazy<IDictionary<string, object>>(
 									() => GameObject.Find("ModdedAPI_Info").GetComponent<IDictionary<string, object>>()
 								);
@@ -66,7 +66,7 @@ namespace NeedyAugmentationMod {
 		}
 
 		public static float GetTimeRate(object timerComponent) {
-			return timerComponent.CallMethod<float>("GetRate");
+			return timerComponent.CallMethod<float>("GetRate"); // ReflectionHelper caches the MethodInfo
 		}
 
 		// Has to be done through the api object,
