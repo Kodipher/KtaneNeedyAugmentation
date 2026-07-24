@@ -65,9 +65,14 @@ namespace NeedyAugmentationMod {
 			return bomb.CallMethod<object>("GetTimer");
 		}
 
-		public static float GetTimeRate(object timerComponent) {
-			return timerComponent.CallMethod<float>("GetRate"); // ReflectionHelper caches the MethodInfo
+		public static float GetTimerTimeRate(object timerComponent) {
+			return timerComponent.CallMethod<float>("GetRate");
 		}
+
+		public static bool IsTimerUpdating(object timerComponent) {
+			return timerComponent.GetValue<bool>("IsUpdating"); 
+		}
+
 
 		// Has to be done through the api object,
 		// because the check is not done in a module component
