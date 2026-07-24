@@ -43,6 +43,8 @@ namespace NeedyAugmentationMod {
 			return description ?? "";
 		}
 		
+		#region /--- Needy Components ---/
+		
 		public static NeedyComponentInfo[] GetAllNeedyComponentsOnTheSameBomb(GameObject bombComponentObject) {
 			
 			if (Application.isEditor) throw new NotSupportedException();
@@ -57,6 +59,23 @@ namespace NeedyAugmentationMod {
 						.Select(NeedyComponentInfo.CreateFromNeedyComponent)
 						.ToArray();
 		}
+		
+		/// <returns>NeedyComponent</returns>
+		public static object GetNeedyComponentComponent(GameObject bombComponentObject) {
+			return bombComponentObject.GetComponent(needyComponentType);
+		}
+
+		public static void NeedyComponentResetAndStart(object needyComponent) {
+			needyComponent.CallMethod("ResetAndStart");
+		}
+		
+		public static void NeedyStartRunning(object needyComponent) {
+			needyComponent.CallMethod("StartRunning");
+		}
+		
+		#endregion
+
+		#region /--- Bomb Timer ---/
 		
 		/// <returns>TimerComponent</returns>
 		public static object GetBombTimer(GameObject bombComponentObject) {
@@ -73,6 +92,7 @@ namespace NeedyAugmentationMod {
 			return timerComponent.GetValue<bool>("IsUpdating"); 
 		}
 
+		#endregion
 
 		// Has to be done through the api object,
 		// because the check is not done in a module component
