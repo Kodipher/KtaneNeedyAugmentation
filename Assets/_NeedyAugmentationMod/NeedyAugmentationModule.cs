@@ -190,7 +190,7 @@ namespace NeedyAugmentationMod {
 				}
 				
 				// Find all needies
-				IntegrationHelper.NeedyComponentInfo[] allNeedyInfos;
+				IntegrationHelper.NeedyComponentProxy[] allNeedyInfos;
 				try {
 					allNeedyInfos = IntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
 				} catch (Exception ex) {

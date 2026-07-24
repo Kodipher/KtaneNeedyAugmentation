@@ -42,10 +42,8 @@ namespace NeedyAugmentationMod {
 
 			return description ?? "";
 		}
-		
-		#region /--- Needy Components ---/
-		
-		public static NeedyComponentInfo[] GetAllNeedyComponentsOnTheSameBomb(GameObject bombComponentObject) {
+
+		public static NeedyComponentProxy[] GetAllNeedyComponentsOnTheSameBomb(GameObject bombComponentObject) {
 			
 			if (Application.isEditor) throw new NotSupportedException();
 			
@@ -56,43 +54,9 @@ namespace NeedyAugmentationMod {
 			return componentList
 						.Cast<MonoBehaviour>()
 						.Where(obj => obj.GetType().IsSubclassOrSelfOf(needyComponentType))
-						.Select(NeedyComponentInfo.CreateFromNeedyComponent)
+						.Select(NeedyComponentProxy.CreateFromNeedyComponent)
 						.ToArray();
 		}
-		
-		/// <returns>NeedyComponent</returns>
-		public static object GetNeedyComponentComponent(GameObject bombComponentObject) {
-			return bombComponentObject.GetComponent(needyComponentType);
-		}
-
-		public static void NeedyComponentResetAndStart(object needyComponent) {
-			needyComponent.CallMethod("ResetAndStart");
-		}
-		
-		public static void NeedyStartRunning(object needyComponent) {
-			needyComponent.CallMethod("StartRunning");
-		}
-		
-		#endregion
-
-		#region /--- Bomb Timer ---/
-		
-		/// <returns>TimerComponent</returns>
-		public static object GetBombTimer(GameObject bombComponentObject) {
-			var bombComponentObjectComponent = bombComponentObject.GetComponent(bombComponentType);
-			var bomb = bombComponentType.GetValue<object>("Bomb", bombComponentObjectComponent);
-			return bomb.CallMethod<object>("GetTimer");
-		}
-
-		public static float GetTimerTimeRate(object timerComponent) {
-			return timerComponent.CallMethod<float>("GetRate");
-		}
-
-		public static bool IsTimerUpdating(object timerComponent) {
-			return timerComponent.GetValue<bool>("IsUpdating"); 
-		}
-
-		#endregion
 
 		// Has to be done through the api object,
 		// because the check is not done in a module component
