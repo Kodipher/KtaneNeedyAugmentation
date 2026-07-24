@@ -25,7 +25,8 @@ namespace NeedyAugmentationMod {
 		
 		public bool IsConfigured { get; private set; } = false;
 		public bool IsAugmenting { get; private set; } = false;
-		public bool ConfigOrModuleHasError { get; private set; } = false;
+		public bool ConfigHasError { get; private set; } = false;
+		public bool ModuleHasError { get; private set; } = false;
 		
 		
 		bool isNeedyRunning = false;
@@ -181,7 +182,7 @@ namespace NeedyAugmentationMod {
 				if (Application.isEditor) {
 					logger.LogString("Testing in TestHarness is not fully supported.");
 					IsConfigured = false;
-					ConfigOrModuleHasError = true;
+					ModuleHasError = true;
 					return;
 				}
 				
@@ -207,7 +208,7 @@ namespace NeedyAugmentationMod {
 						logger.LogString("Filed to read mission description.");
 						logger.LogException(ex);
 						IsConfigured = false;
-						ConfigOrModuleHasError = true;
+						ModuleHasError = true;
 						return;
 					}
 					throw;
@@ -237,7 +238,7 @@ namespace NeedyAugmentationMod {
 					logger.LogString($"Configuration has a format error: {ex.Message}");
 					IsConfigured = true;
 					IsAugmenting = false;
-					ConfigOrModuleHasError = true;
+					ConfigHasError = true;
 					return;
 				}
 				
@@ -248,7 +249,7 @@ namespace NeedyAugmentationMod {
 				
 				IsConfigured = true;
 				IsAugmenting = false; // to be overwritten
-				ConfigOrModuleHasError = false;
+				ConfigHasError = false;
 				
 				// Apply config
 				logger.LogString("Augmenting...");
@@ -312,6 +313,7 @@ namespace NeedyAugmentationMod {
 		const string AugmentedText = "AUGMETNED";
 		const string UnchangedText = "UNCHANGED";
 		const string NoConfigText = "NO CONFIG";
+		const string ModuleErrorText = "MODULEERR";
 		const string StrikeText = "X*X*X*X*X";
 		
 		static readonly Pair<Color, Color> introColors = Pair.New(
@@ -402,7 +404,7 @@ namespace NeedyAugmentationMod {
 			verticalDisplay.ClearString();
 			
 			// Faulty config strike sound
-			if (IsConfigured && ConfigOrModuleHasError) {
+			if (IsConfigured && ConfigHasError) {
 				kmAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.Strike, transform);
 			}
 			
@@ -480,7 +482,10 @@ namespace NeedyAugmentationMod {
 			string displayText;
 			Pair<Color, Color> displayColor;
 
-			if (!IsConfigured) {
+			if (ModuleHasError) {
+				displayText = ModuleErrorText;
+				displayColor = errorColors;
+			} else if (!IsConfigured) {
 				displayText = NoConfigText;
 				displayColor = noConfigColors;
 			} else if (IsAugmenting) {
@@ -491,7 +496,7 @@ namespace NeedyAugmentationMod {
 				displayColor = unchangedColors;
 			}
 
-			if (ConfigOrModuleHasError) {
+			if (ConfigHasError) {
 				displayColor = errorColors;
 			}
 			
