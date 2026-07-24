@@ -231,8 +231,18 @@ namespace NeedyAugmentationMod {
 				}
 				
 				// Ensure patch; clean dead cache
-				// todo: ensure patch
 				AugmentedActivatorComponent.ClearDeadCacheReferences();
+				
+				try {
+					GameIntegrationHelper.Patcher.EnsurePatched();
+				} catch (Exception ex) {
+					logger.LogString("Failed to apply the Harmony patch.");
+					logger.LogException(ex);
+					IsConfigured = false;
+					ModuleHasError = true; 
+					//return;
+					throw;
+				}
 				
 				// Prevent self from activating
 				var noActivationProps = new AugmentationPropertySet() { ModuleId = kmNeedyModule.ModuleType, ActivationLimit = 0 };
