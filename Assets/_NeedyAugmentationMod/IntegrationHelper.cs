@@ -53,6 +53,17 @@ namespace NeedyAugmentationMod {
 						.ToArray();
 		}
 		
+		/// <returns>TimerComponent</returns>
+		public static object GetBombTimer(GameObject bombComponentObject) {
+			var bombComponentObjectComponent = bombComponentObject.GetComponent(bombComponentType);
+			var bomb = bombComponentType.GetValue<object>("Bomb", bombComponentObjectComponent);
+			return bomb.CallMethod<object>("GetTimer");
+		}
+
+		public static float GetTimeRate(object timerComponent) {
+			return timerComponent.CallMethod<float>("GetRate");
+		}
+		
 	}
 
 }
