@@ -23,7 +23,7 @@ namespace NeedyAugmentationMod {
 
 		public bool IsConfigurationHandledByAnother { get; private set; } = false;
 		
-		public bool IsConfigured { get; private set; } = false; // Overrules IsAugmenting
+		public bool IsConfigured { get; private set; } = false;
 		public bool IsAugmenting { get; private set; } = false;
 		public bool ConfigHasError { get; private set; } = false;
 		
@@ -181,6 +181,7 @@ namespace NeedyAugmentationMod {
 				if (Application.isEditor) {
 					logger.LogString("Testing in TestHarness is not fully supported.");
 					IsConfigured = false;
+					ConfigHasError = true;
 					return;
 				}
 				
@@ -302,7 +303,7 @@ namespace NeedyAugmentationMod {
 		
 		#endregion
 		
-		#region /--- Display Texts ---/
+		#region /--- Display Texts and Colors ---/
 
 		const string AugmentedText = "AUGMETNED";
 		const string UnchangedText = "UNCHANGED";
@@ -478,15 +479,16 @@ namespace NeedyAugmentationMod {
 			if (!IsConfigured) {
 				displayText = NoConfigText;
 				displayColor = noConfigColors;
-			} else if (ConfigHasError) {
-				displayText = UnchangedText;
-				displayColor = errorColors;
 			} else if (IsAugmenting) {
 				displayText = AugmentedText;
 				displayColor = augmentedColors;
 			} else {
 				displayText = UnchangedText;
 				displayColor = unchangedColors;
+			}
+
+			if (ConfigHasError) {
+				displayColor = errorColors;
 			}
 			
 			// Animate
