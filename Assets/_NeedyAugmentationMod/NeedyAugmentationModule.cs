@@ -186,13 +186,30 @@ namespace NeedyAugmentationMod {
 					return;
 				}
 				
-				var allNeedyInfos = GameIntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
+				// Find all needies
+				GameIntegrationHelper.NeedyComponentInfo[] allNeedyInfos;
+				try {
+					allNeedyInfos = GameIntegrationHelper.GetAllNeedyComponentsOnTheSameBomb(this.gameObject);
+				} catch (Exception ex) {
+					if (
+						ex is NullReferenceException || 
+						ex is InvalidCastException ||
+						ex is System.Reflection.TargetParameterCountException
+					) {
+						logger.LogString("Filed to find all needies.");
+						logger.LogException(ex);
+						IsConfigured = false;
+						ModuleHasError = true;
+						return;
+					}
+					throw;
+				}
 				
 				// Prevent duplicate config reads
 				foreach (var needyInfo in allNeedyInfos) {
 
 					if (needyInfo.KmNeedy == null) continue; // vanilla needies
-					if (needyInfo.KmNeedy.ModuleType != kmNeedyModule.ModuleType) continue; // not needy augmentation
+					if (needyInfo.KmNeedy.ModuleType != kmNeedyModule.ModuleType) continue; // not NeedyAugmentation
 					if (needyInfo.KmNeedy == this.kmNeedyModule) continue; // this
 
 					needyInfo.KmNeedy.GetComponent<NeedyAugmentationModule>().IsConfigurationHandledByAnother = true;
@@ -200,11 +217,14 @@ namespace NeedyAugmentationMod {
 				
 				// Read config
 				string description;
-				logger.LogString("Checking configuration...");
 				try {
 					description = GameIntegrationHelper.GetCurrentMissionDescription();
 				} catch (Exception ex) {
-					if (ex is NullReferenceException || ex is System.Reflection.TargetParameterCountException) {
+					if (
+						ex is NullReferenceException || 
+						ex is InvalidCastException ||
+						ex is System.Reflection.TargetParameterCountException
+					) {
 						logger.LogString("Filed to read mission description.");
 						logger.LogException(ex);
 						IsConfigured = false;
