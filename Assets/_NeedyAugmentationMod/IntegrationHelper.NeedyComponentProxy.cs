@@ -110,6 +110,8 @@ namespace NeedyAugmentationMod {
 			public int BombCountSolvedComponents() {
 
 				if (bombGetSolvedComponentCountMethod == null) {
+					bombGetSolvedComponentCountMethod = () => 0; // prevent throwing exceptions every frame
+					
 					var bomb = bombComponentType.GetValue<object>("Bomb", NeedyComponent);
 					bombGetSolvedComponentCountMethod = (Func<int>)Delegate.CreateDelegate(typeof(Func<int>), bomb, "GetSolvedComponentCount");
 				}

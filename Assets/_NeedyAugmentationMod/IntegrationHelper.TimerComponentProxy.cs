@@ -30,6 +30,7 @@ namespace NeedyAugmentationMod {
 			public float GetRate() {
 
 				if (getRateMethod == null) {
+					getRateMethod = () => 1f; // prevent throwing exceptions every frame
 					getRateMethod = (Func<float>)Delegate.CreateDelegate(typeof(Func<float>), TimerComponent, "GetRate");
 				}
 
@@ -39,6 +40,8 @@ namespace NeedyAugmentationMod {
 			public bool GetIsUpdating() {
 				
 				if (isUpdatingPropertyGetter == null) {
+					isUpdatingPropertyGetter = () => false; // prevent throwing exceptions every frame
+					
 					var methodInfo = TimerComponent.GetType().GetProperty("IsUpdating")?.GetGetMethod();
 					if (methodInfo == null) throw new NullReferenceException("Cannot find IsUpdating property getter.");
 					
