@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System;
+using System.Reflection;
+using System.Linq.Expressions;
 
 using JetBrains.Annotations;
 
@@ -26,6 +28,7 @@ namespace NeedyAugmentationMod {
 			
 			[CanBeNull] Func<float> getRateMethod = null;
 			[CanBeNull] Func<bool> isUpdatingPropertyGetter = null;
+			[CanBeNull] Func<float> timeRemainingFieldGetter = null;
 			
 			public float GetRate() {
 
@@ -49,6 +52,21 @@ namespace NeedyAugmentationMod {
 				}
 
 				return isUpdatingPropertyGetter();
+			}
+
+			public float GetTimeRemaining() {
+
+				if (timeRemainingFieldGetter == null) {
+					timeRemainingFieldGetter = () => 0f; // prevent throwing exceptions every frame
+
+					FieldInfo fieldInfo = TimerComponent.GetType().GetField("TimeRemaining");
+					
+					var instanceExp = Expression.Constant(TimerComponent);
+					var fieldGetExp = Expression.Field(instanceExp, fieldInfo);
+					timeRemainingFieldGetter = Expression.Lambda<Func<float>>(fieldGetExp).Compile();
+				}
+
+				return timeRemainingFieldGetter();
 			}
 			
 		}
