@@ -208,6 +208,94 @@ namespace NeedyAugmentationMod {
 			modulesSolvableTotal = NeedyComponent.BombCountSolvableComponents();
 		}
 
+		public void Update() {
+			
+			if (!TimerComponent.GetIsUpdating()) return;
+
+			float timerRate = Mathf.Abs(TimerComponent.GetRate());
+			TimeSpan deltaTime = TimeSpan.FromSeconds(Time.deltaTime * timerRate);
+			
+			
+			// Handle states
+			switch (CurrentState) {
+
+				case ActivatorState.Initiating:
+					
+					// Check start
+					if (Settings.StartThresholdModules.HasValue) {
+						CurrentState = ActivatorState.WaitingForStartModules;
+						goto case ActivatorState.WaitingForStartModules;
+					}
+					
+					if (Settings.StartThresholdTime.HasValue) {
+						CurrentState = ActivatorState.WaitingForStartTime;
+						startDelayLeft = Settings.StartThresholdTime.Value;
+						goto case ActivatorState.WaitingForStartTime;
+					}
+					
+					// Normal
+					EnterInterruptableActivationWait();
+					goto case ActivatorState.WaitingForActivationInterruptable;
+				
+				case ActivatorState.WaitingForStartModules:
+					UpdateModulesSolvedAndActivationLimit();
+					int threshold = Settings.ActivationLimitSolves ?? 0;
+					if (modulesSolved >= threshold) {
+						EnterInterruptableActivationWait();
+					}
+					break;
+				
+				case ActivatorState.WaitingForStartTime:
+					
+					startDelayLeft -= deltaTime;
+					
+					if (startDelayLeft < TimeSpan.Zero) {
+						EnterInterruptableActivationWait();
+						initialActivationDelayLeft -= -startDelayLeft; // time left over
+					}
+					break;
+				
+				case ActivatorState.WaitingForActivationInterruptable:
+
+					initialActivationDelayLeft -= deltaTime;
+					if (initialActivationDelayLeft < TimeSpan.Zero) {
+						NeedyComponent.StartRunning();
+						CurrentState = ActivatorState.NormalBehavior;
+					}
+					break;
+				
+			}
+		}
+		
+		public void EnterInterruptableActivationWait() {
+			CurrentState = ActivatorState.WaitingForActivationInterruptable;
+			
+			if (Settings.InitialActivationTime.HasValue) {
+				initialActivationDelayLeft = Settings.InitialActivationTime.Value;
+				return;
+			}
+			
+			int activationTime = NeedyComponent.GetSecondsBeforeForcedActivation(); // set by the game to be mission setting
+			initialActivationDelayLeft = TimeSpan.FromSeconds(activationTime);
+		}
+
+		/// <remarks>
+		/// When <paramref name="isInterrupted"/> is true,
+		/// the caller MUST activate the needy via StartRunning().
+		/// </remarks>
+		public void GuardInterruption(out bool isInterrupted) {
+			
+			if (CurrentState != ActivatorState.WaitingForActivationInterruptable) {
+				// Cannot interrupt
+				isInterrupted = false;	
+				return;
+			}
+				
+			// Interrupting...
+			CurrentState = ActivatorState.NormalBehavior;
+			isInterrupted = true;
+		}
+
 	}
 	
 }
