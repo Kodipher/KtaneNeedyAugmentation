@@ -60,6 +60,9 @@ namespace NeedyAugmentationMod {
 			
 			[CanBeNull] Action resetAndStartMethod = null;
 			[CanBeNull] Action startRunningMethod = null;
+			[CanBeNull] Action<int> changeStateMethod = null;
+			[CanBeNull] Action<bool> turnOffMethod = null;
+			[CanBeNull] Func<int> bombGetSolvedComponentCountMethod = null;
 			
 			public void ResetAndStart() {
 
@@ -77,6 +80,41 @@ namespace NeedyAugmentationMod {
 				}
 				
 				startRunningMethod();
+			}
+
+			public enum NeedyState {
+				InitialSetup = 0,
+				AwaitingActivation = 1,
+				Running = 2,
+				Cooldown = 3,
+				Terminated = 4,
+				BombComplete = 5
+			}
+
+			public void ChangeState(NeedyState newState) {
+				if (changeStateMethod == null) {
+					changeStateMethod = (Action<int>)Delegate.CreateDelegate(typeof(Action<int>), NeedyComponent, "ChangeState");
+				}
+
+				changeStateMethod((int)newState);
+			}
+			
+			public void TurnOff(bool bombSolved = true /*Parameter is unused anyway*/) {
+				if (turnOffMethod == null) {
+					turnOffMethod = (Action<bool>)Delegate.CreateDelegate(typeof(Action<bool>), NeedyComponent, "TurnOff");
+				}
+
+				turnOffMethod(bombSolved);
+			}
+
+			public int BombCountSolvedComponents() {
+
+				if (bombGetSolvedComponentCountMethod == null) {
+					var bomb = bombComponentType.GetValue<object>("Bomb", NeedyComponent);
+					bombGetSolvedComponentCountMethod = (Func<int>)Delegate.CreateDelegate(typeof(Func<int>), bomb, "GetSolvedComponentCount");
+				}
+
+				return bombGetSolvedComponentCountMethod();
 			}
 			
 		}
