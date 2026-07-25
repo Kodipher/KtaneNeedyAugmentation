@@ -7,6 +7,20 @@ using JetBrains.Annotations;
 
 namespace NeedyAugmentationMod {
 
+	/// <summary>
+	/// <para>
+	/// Handles activation and deactivation of the needy it is attached to.
+	/// </para>
+	/// <para>
+	/// A lot of logic is left to the original method,
+	/// with harmony patches querying the activator.
+	/// </para>
+	/// <para>
+	/// <see cref="CurrentState"/> overrules the needy's state, unless
+	/// it is <see cref="ActivatorState.NormalBehavior"/>.
+	/// (It is a bit of a mess, setting Needy's internal state has unintended effects)
+	/// </para>
+	/// </summary>
 	public class AugmentedActivatorComponent : MonoBehaviour {
 
 		#region /--- Global Instance Cache ---/

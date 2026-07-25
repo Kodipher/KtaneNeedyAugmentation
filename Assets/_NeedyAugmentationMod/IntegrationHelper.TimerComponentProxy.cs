@@ -10,6 +10,7 @@ namespace NeedyAugmentationMod {
 
 	public static partial class IntegrationHelper {
 		
+		/// <summary>Holds some proxy methods and getters for a TimerComponent.</summary>
 		public class TimerComponentProxy {
 			
 			public MonoBehaviour TimerComponent { get; }

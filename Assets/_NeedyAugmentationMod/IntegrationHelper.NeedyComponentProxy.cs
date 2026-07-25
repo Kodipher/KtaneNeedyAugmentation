@@ -11,6 +11,7 @@ namespace NeedyAugmentationMod {
 
 	public static partial class IntegrationHelper {
 		
+		/// <summary>Holds some information and proxy methods for a NeedyComponent.</summary>
 		public class NeedyComponentProxy {
 			
 			public MonoBehaviour NeedyComponent { get; }
