@@ -152,7 +152,50 @@ namespace NeedyAugmentationMod {
 		}
 		
 		#endregion
+		
+		#region /--- State ---/
 
+		public enum ActivatorState {
+			Initiating,
+			WaitingForStartModules,
+			WaitingForStartTime,
+			WaitingForActivationInterruptable,
+			NormalBehavior,
+			WaitingForSolve,
+			Stopped,
+			Terminated
+		}
+
+		public ActivatorState CurrentState { get; private set; } = ActivatorState.Initiating;
+		
+		TimeSpan startDelayLeft = TimeSpan.Zero;
+		TimeSpan initialActivationDelayLeft = TimeSpan.Zero;
+
+		public int TimesActivated { get; private set; } = 0;
+		
+		/// <remarks>Is updates to be in line with <see cref="modulesSolved"/>.</remarks>
+		public int? ActivationLimit { get; private set; } = null;
+
+		public bool ActivationLimitRisingWithSolves { get; private set; } = false;
+		
+		/// <summary>Should not be set directly. Use <see cref="UpdateModulesSolvedAndActivationLimit"/>.</summary>
+		int modulesSolved = -1;
+
+		int modulesSolvableTotal = -1;
+		
+		void UpdateModulesSolvedAndActivationLimit() {
+			int newSolvedModules = NeedyComponent.BombCountSolvedComponents();
+			if (newSolvedModules == modulesSolved) return;
+			
+			modulesSolved = newSolvedModules;
+			ActivationLimit = CalculateActivationLimitForSolves(modulesSolved);
+		}
+		
+		public bool IsInStoppedState() {
+			return CurrentState == ActivatorState.Stopped || CurrentState == ActivatorState.Terminated;
+		}
+		
+		#endregion
 		
 		public IntegrationHelper.NeedyComponentProxy NeedyComponent { get; private set; }
 		public IntegrationHelper.TimerComponentProxy TimerComponent { get; private set; }
@@ -160,6 +203,9 @@ namespace NeedyAugmentationMod {
 		public void Start() {
 			var needyGameObject = NeedyComponent.NeedyComponent.gameObject;
 			TimerComponent = IntegrationHelper.TimerComponentProxy.CreateFromComponentOnTheSameBomb(needyGameObject);
+
+			ActivationLimitRisingWithSolves = IsActivationLimitRisingWithSolves();
+			modulesSolvableTotal = NeedyComponent.BombCountSolvableComponents();
 		}
 
 	}
