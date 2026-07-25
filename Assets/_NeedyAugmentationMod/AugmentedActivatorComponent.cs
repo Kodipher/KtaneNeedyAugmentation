@@ -102,12 +102,12 @@ namespace NeedyAugmentationMod {
 		}
 		
 		#endregion
+
+		#region /--- Settings and Math ---/
 		
 		public AugmentationPropertySet Settings { get; private set; }
-
-		public int TimesActivated { get; private set; } = 0;
 		
-		int? GetActivationLimitForSolves(int solves) {
+		int? CalculateActivationLimitForSolves(int solves) {
 
 			int? settingBase = Settings.ActivationLimit;
 			int? settingPer = Settings.ActivationLimitAddendPerSolves;
@@ -126,6 +126,22 @@ namespace NeedyAugmentationMod {
 			return settingBase.Value + (solves / settingSolves.Value) * settingPer.Value; // base + per/solves
 		}
 
+		bool IsActivationLimitRisingWithSolves() {
+			
+			int? settingBase = Settings.ActivationLimit;
+			int? settingPer = Settings.ActivationLimitAddendPerSolves;
+			int? settingSolves = Settings.ActivationLimitSolves;
+
+			if (!settingBase.HasValue) return false;
+			if (!settingPer.HasValue) return false;
+			if (!settingSolves.HasValue) return settingPer > 0;
+
+			if (settingPer.Value == 0) return false; 
+			if (settingSolves.Value == 0) return false; 
+			
+			return Math.Sign(settingPer.Value) == Math.Sign(settingSolves.Value);
+		}
+
 		/// <returns>seconds</returns>
 		float ModifyCooldown(float cooldownSeconds) {
 			float result = cooldownSeconds;
@@ -134,6 +150,8 @@ namespace NeedyAugmentationMod {
 			if (result <= 0) return 0;
 			return result;
 		}
+		
+		#endregion
 
 		
 		public IntegrationHelper.NeedyComponentProxy NeedyComponent { get; private set; }
