@@ -240,7 +240,7 @@ namespace NeedyAugmentationMod {
 						
 						case 's': 
 							float seconds = ConfigParseFloat(match.Groups[1].ToString(), "start", moduleId);
-							currentSet.StartThresholdSeconds = TimeSpan.FromSeconds(seconds);
+							currentSet.StartThresholdTime = TimeSpan.FromSeconds(seconds);
 							break;
 						
 						case 'm':
@@ -266,7 +266,7 @@ namespace NeedyAugmentationMod {
 						
 						case 's': 
 							float seconds = ConfigParseFloat(match.Groups[1].ToString(), "term", moduleId);
-							currentSet.TerminationThresholdSeconds = TimeSpan.FromSeconds(seconds);
+							currentSet.TerminationThresholdTime = TimeSpan.FromSeconds(seconds);
 							break;
 						
 						case 'm':
@@ -292,7 +292,7 @@ namespace NeedyAugmentationMod {
 						
 						case 's': 
 							float seconds = ConfigParseFloat(match.Groups[1].ToString(), "stop", moduleId);
-							currentSet.StopThresholdSeconds = TimeSpan.FromSeconds(seconds);
+							currentSet.StopThresholdTime = TimeSpan.FromSeconds(seconds);
 							break;
 						
 						case 'm':

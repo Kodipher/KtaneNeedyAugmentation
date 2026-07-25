@@ -23,13 +23,13 @@ namespace NeedyAugmentationMod {
 		public int? ActivationLimitAddendPerSolves { get; set; } = null;
 		public int? ActivationLimitSolves { get; set; } = null;
 
-		public TimeSpan? StartThresholdSeconds { get; set; } = null;
+		public TimeSpan? StartThresholdTime { get; set; } = null;
 		public int? StartThresholdModules { get; set; } = null;
 			
-		public TimeSpan? StopThresholdSeconds { get; set; } = null;
+		public TimeSpan? StopThresholdTime { get; set; } = null;
 		public int? StopThresholdModules { get; set; } = null;
 
-		public TimeSpan? TerminationThresholdSeconds { get; set; } = null;
+		public TimeSpan? TerminationThresholdTime { get; set; } = null;
 		public int? TerminationThresholdModules { get; set; } = null;
 
 
@@ -87,8 +87,8 @@ namespace NeedyAugmentationMod {
 				}
 			}
 
-			if (StartThresholdSeconds.HasValue) {
-				var formatPair = Pair.New("start={0}s", new object[] { StartThresholdSeconds.Value.TotalSeconds });
+			if (StartThresholdTime.HasValue) {
+				var formatPair = Pair.New("start={0}s", new object[] { StartThresholdTime.Value.TotalSeconds });
 				properties.Add(formatPair);
 			}
 			
@@ -97,8 +97,8 @@ namespace NeedyAugmentationMod {
 				properties.Add(formatPair);
 			}
 
-			if (StopThresholdSeconds.HasValue) {
-				var formatPair = Pair.New("stop={0}s", new object[] { StopThresholdSeconds.Value.TotalSeconds });
+			if (StopThresholdTime.HasValue) {
+				var formatPair = Pair.New("stop={0}s", new object[] { StopThresholdTime.Value.TotalSeconds });
 				properties.Add(formatPair);
 			}
 			
@@ -107,8 +107,8 @@ namespace NeedyAugmentationMod {
 				properties.Add(formatPair);
 			}
 			
-			if (TerminationThresholdSeconds.HasValue) {
-				var formatPair = Pair.New("term={0}s", new object[] { TerminationThresholdSeconds.Value.TotalSeconds });
+			if (TerminationThresholdTime.HasValue) {
+				var formatPair = Pair.New("term={0}s", new object[] { TerminationThresholdTime.Value.TotalSeconds });
 				properties.Add(formatPair);
 			}
 			
