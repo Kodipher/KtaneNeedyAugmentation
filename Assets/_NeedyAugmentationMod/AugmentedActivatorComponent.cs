@@ -316,11 +316,27 @@ namespace NeedyAugmentationMod {
 					}
 					break;
 				
+				case ActivatorState.NormalBehavior:
+					// [nop] 
+					break;
+
+				case ActivatorState.WaitingForSolve:
+					bool isActivating;
+					GuardActivationBySolves(out isActivating); // try to activate every frame
+
+					if (isActivating) {
+						CurrentState = ActivatorState.NormalBehavior;
+						NeedyComponent.ResetAndStart();
+					}
+					break;
 				
 				case ActivatorState.Stopped:
 				case ActivatorState.Terminated:
 					// [nop]
 					break;
+				
+				default:
+					throw new ArgumentOutOfRangeException();
 			}
 		}
 		
@@ -364,6 +380,26 @@ namespace NeedyAugmentationMod {
 			// Interrupting...
 			CurrentState = ActivatorState.NormalBehavior;
 			isInterrupted = true;
+		}
+
+		/// <remarks>
+		/// When <paramref name="isActivating"/> is true,
+		/// the caller MUST activate the needy via ResetAndStart().
+		/// </remarks>
+		public void GuardActivationBySolves(out bool isActivating) {
+			
+			UpdateModulesSolvedAndActivationLimitOncePerFrame();
+			
+			if (ActivationLimit.HasValue && TimesActivated >= ActivationLimit.Value) {
+				isActivating = false;
+
+				// Stop if no activations are possible after this either
+				if (!ActivationLimitRisingWithSolves) EnterStopped();
+				return;
+			}
+			
+			isActivating = true;
+			TimesActivated++;
 		}
 
 	}
