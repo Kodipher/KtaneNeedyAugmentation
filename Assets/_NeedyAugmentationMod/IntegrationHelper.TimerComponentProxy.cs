@@ -45,7 +45,7 @@ namespace NeedyAugmentationMod {
 					var methodInfo = TimerComponent.GetType().GetProperty("IsUpdating")?.GetGetMethod();
 					if (methodInfo == null) throw new NullReferenceException("Cannot find IsUpdating property getter.");
 					
-					isUpdatingPropertyGetter = (Func<bool>)Delegate.CreateDelegate(typeof(Func<float>), TimerComponent, methodInfo);
+					isUpdatingPropertyGetter = (Func<bool>)Delegate.CreateDelegate(typeof(Func<bool>), TimerComponent, methodInfo);
 				}
 
 				return isUpdatingPropertyGetter();
