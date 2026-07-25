@@ -18,10 +18,16 @@ namespace NeedyAugmentationMod {
 			public const string HarmonyId = "kodipher.NeedyAugmentation";
 			
 			static readonly Harmony harmony = new Harmony(HarmonyId);
+			static bool isPatched = false;
 			
 			/// <remarks>May throw.</remarks>
 			public static void EnsurePatched() {
-				if (Harmony.HasAnyPatches(HarmonyId)) return;
+				
+				if (isPatched) return;
+				
+				// Prevents dupe patches in case of an error
+				if (Harmony.HasAnyPatches(HarmonyId)) harmony.UnpatchAll(HarmonyId);
+				
 				Patch();
 			}
 			
@@ -70,6 +76,8 @@ namespace NeedyAugmentationMod {
 				original = needyComponentType.GetMethod("TurnOff", AllMethodFlags);
 				prefix = typeof(Patcher).GetMethod(nameof(TurnOffPrefix), AllMethodFlags);
 				harmony.Patch(original, prefix: new HarmonyMethod(prefix));
+
+				isPatched = true;
 			}
 
 			#region /--- Patches ---/
