@@ -12,6 +12,7 @@ namespace NeedyAugmentationMod {
 	public static partial class IntegrationHelper {
 		
 		/// <summary>Holds some information and proxy methods for a NeedyComponent.</summary>
+		/// <remarks>Additionally, caches some NeedyComponent.Bomb methods.</remarks>
 		public class NeedyComponentProxy {
 			
 			public MonoBehaviour NeedyComponent { get; }
@@ -65,6 +66,7 @@ namespace NeedyAugmentationMod {
 			[CanBeNull] Action startRunningMethod = null;
 			[CanBeNull] Action<bool> turnOffMethod = null;
 			[CanBeNull] Func<int> secondsBeforeForcedActivationFieldGetter = null;
+			[CanBeNull] Func<int> bombGetSolvableComponentCountMethod = null;
 			[CanBeNull] Func<int> bombGetSolvedComponentCountMethod = null;
 			
 			public void ResetAndStart() {
@@ -115,6 +117,18 @@ namespace NeedyAugmentationMod {
 				}
 				
 				return secondsBeforeForcedActivationFieldGetter();
+			}
+			
+			public int BombCountSolvableComponents() {
+
+				if (bombGetSolvableComponentCountMethod == null) {
+					bombGetSolvableComponentCountMethod = () => 0; // prevent throwing exceptions every frame
+					
+					var bomb = bombComponentType.GetValue<object>("Bomb", NeedyComponent);
+					bombGetSolvableComponentCountMethod = (Func<int>)Delegate.CreateDelegate(typeof(Func<int>), bomb, "GetSolvableComponentCount");
+				}
+
+				return bombGetSolvableComponentCountMethod();
 			}
 
 			public int BombCountSolvedComponents() {
