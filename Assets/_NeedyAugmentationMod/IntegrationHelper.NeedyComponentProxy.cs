@@ -128,6 +128,11 @@ namespace NeedyAugmentationMod {
 				return bombGetSolvedComponentCountMethod();
 			}
 			
+			/// <remarks>Always uses Reflection.</remarks>
+			public void SetHasStarted(bool value) {
+				NeedyComponent.SetValue("hasStarted", value);
+			}
+			
 		}
 	}
 
