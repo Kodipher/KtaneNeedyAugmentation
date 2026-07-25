@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System;
+using System.Reflection;
+using System.Linq.Expressions;
 using Rephidock.GeneralUtilities.Reflection;
 
 using JetBrains.Annotations;
@@ -62,6 +64,7 @@ namespace NeedyAugmentationMod {
 			[CanBeNull] Action startRunningMethod = null;
 			[CanBeNull] Action<int> changeStateMethod = null;
 			[CanBeNull] Action<bool> turnOffMethod = null;
+			[CanBeNull] Func<int> secondsBeforeForcedActivationFieldGetter = null;
 			[CanBeNull] Func<int> bombGetSolvedComponentCountMethod = null;
 			
 			public void ResetAndStart() {
@@ -105,6 +108,21 @@ namespace NeedyAugmentationMod {
 				}
 
 				turnOffMethod(bombSolved);
+			}
+
+			public int GetSecondsBeforeForcedActivation() {
+
+				if (secondsBeforeForcedActivationFieldGetter == null) {
+					secondsBeforeForcedActivationFieldGetter = () => 90; // prevent throwing exceptions every frame
+					
+					FieldInfo fieldInfo = NeedyComponent.GetType().GetField("SecondsBeforeForcedActivation");
+					
+					var instanceExp = Expression.Constant(NeedyComponent);
+					var fieldGetExp = Expression.Field(instanceExp, fieldInfo);
+					secondsBeforeForcedActivationFieldGetter = Expression.Lambda<Func<int>>(fieldGetExp).Compile();
+				}
+				
+				return secondsBeforeForcedActivationFieldGetter();
 			}
 
 			public int BombCountSolvedComponents() {
