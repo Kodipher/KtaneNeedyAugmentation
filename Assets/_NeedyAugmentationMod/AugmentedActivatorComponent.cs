@@ -16,7 +16,7 @@ namespace NeedyAugmentationMod {
 	/// with harmony patches querying the activator.
 	/// </para>
 	/// <para>
-	/// <see cref="CurrentState"/> overrules the needy's state, unless
+	/// <see cref="CurrentState"/> takes priority over needy's state, unless
 	/// it is <see cref="ActivatorState.NormalBehavior"/>.
 	/// (It is a bit of a mess, setting Needy's internal state has unintended effects)
 	/// </para>
