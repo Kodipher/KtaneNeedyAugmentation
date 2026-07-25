@@ -324,10 +324,7 @@ namespace NeedyAugmentationMod {
 					bool isActivating;
 					GuardActivationBySolves(out isActivating); // try to activate every frame
 
-					if (isActivating) {
-						CurrentState = ActivatorState.NormalBehavior;
-						NeedyComponent.ResetAndStart();
-					}
+					if (isActivating) NeedyComponent.ResetAndStart();
 					break;
 				
 				case ActivatorState.Stopped:
@@ -392,6 +389,7 @@ namespace NeedyAugmentationMod {
 			
 			if (ActivationLimit.HasValue && TimesActivated >= ActivationLimit.Value) {
 				isActivating = false;
+				CurrentState = ActivatorState.WaitingForSolve;
 
 				// Stop if no activations are possible after this either
 				if (!ActivationLimitRisingWithSolves) EnterStopped();
@@ -399,6 +397,7 @@ namespace NeedyAugmentationMod {
 			}
 			
 			isActivating = true;
+			CurrentState = ActivatorState.NormalBehavior;
 			TimesActivated++;
 		}
 
