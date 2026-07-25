@@ -62,7 +62,6 @@ namespace NeedyAugmentationMod {
 			
 			[CanBeNull] Action resetAndStartMethod = null;
 			[CanBeNull] Action startRunningMethod = null;
-			[CanBeNull] Action<int> changeStateMethod = null;
 			[CanBeNull] Action<bool> turnOffMethod = null;
 			[CanBeNull] Func<int> secondsBeforeForcedActivationFieldGetter = null;
 			[CanBeNull] Func<int> bombGetSolvedComponentCountMethod = null;
@@ -92,14 +91,6 @@ namespace NeedyAugmentationMod {
 				Cooldown = 3,
 				Terminated = 4,
 				BombComplete = 5
-			}
-
-			public void ChangeState(NeedyState newState) {
-				if (changeStateMethod == null) {
-					changeStateMethod = (Action<int>)Delegate.CreateDelegate(typeof(Action<int>), NeedyComponent, "ChangeState");
-				}
-
-				changeStateMethod((int)newState);
 			}
 			
 			public void TurnOff(bool bombSolved = true /*Parameter is unused anyway*/) {
