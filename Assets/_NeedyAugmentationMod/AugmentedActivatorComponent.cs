@@ -173,17 +173,25 @@ namespace NeedyAugmentationMod {
 
 		public int TimesActivated { get; private set; } = 0;
 		
-		/// <remarks>Is updates to be in line with <see cref="modulesSolved"/>.</remarks>
+		/// <remarks>Is updated to be in line with <see cref="modulesSolved"/>.</remarks>
 		public int? ActivationLimit { get; private set; } = null;
 
 		public bool ActivationLimitRisingWithSolves { get; private set; } = false;
 		
-		/// <summary>Should not be set directly. Use <see cref="UpdateModulesSolvedAndActivationLimit"/>.</summary>
+		/// <summary>Should not be set directly. Use <see cref="UpdateModulesSolvedAndActivationLimitOncePerFrame"/>.</summary>
 		int modulesSolved = -1;
-
 		int modulesSolvableTotal = -1;
 		
-		void UpdateModulesSolvedAndActivationLimit() {
+		/// <summary>Must be cleared every frame.</summary>
+		bool modulesSolvedUpdatedThisFrame = false;
+
+		bool isZenOrTimeMode = false;
+		
+		void UpdateModulesSolvedAndActivationLimitOncePerFrame() {
+
+			if (modulesSolvedUpdatedThisFrame) return;
+			modulesSolvedUpdatedThisFrame = true;
+			
 			int newSolvedModules = NeedyComponent.BombCountSolvedComponents();
 			if (newSolvedModules == modulesSolved) return;
 			
@@ -206,6 +214,7 @@ namespace NeedyAugmentationMod {
 
 			ActivationLimitRisingWithSolves = IsActivationLimitRisingWithSolves();
 			modulesSolvableTotal = NeedyComponent.BombCountSolvableComponents();
+			isZenOrTimeMode = IntegrationHelper.IsZenMode() || IntegrationHelper.IsTimeMode();
 		}
 
 		public void Update() {
@@ -214,7 +223,50 @@ namespace NeedyAugmentationMod {
 
 			float timerRate = Mathf.Abs(TimerComponent.GetRate());
 			TimeSpan deltaTime = TimeSpan.FromSeconds(Time.deltaTime * timerRate);
+
+			modulesSolvedUpdatedThisFrame = false;
 			
+			// Check if activator needs to stop or terminate
+			if (!IsInStoppedState()) {
+				
+				// Check for stop
+				if (CurrentState != ActivatorState.Terminated) {
+					
+					if (Settings.StopThresholdModules.HasValue) {
+						
+						UpdateModulesSolvedAndActivationLimitOncePerFrame();
+						
+						int modulesLeft = modulesSolvableTotal - modulesSolved;
+						if (modulesLeft <= Settings.StopThresholdModules.Value) {
+							EnterStopped();
+						}
+					}
+
+					if (Settings.StopThresholdTime.HasValue && !isZenOrTimeMode) {
+						if (TimerComponent.GetTimeRemaining() <= Settings.StopThresholdTime.Value.TotalSeconds) {
+							EnterStopped();
+						}
+					}
+					
+				}
+
+				// Check for terminate				
+				if (Settings.TerminationThresholdModules.HasValue) {
+					
+					UpdateModulesSolvedAndActivationLimitOncePerFrame();
+					
+					int modulesLeft = modulesSolvableTotal - modulesSolved;
+					if (modulesLeft <= Settings.TerminationThresholdModules.Value) {
+						EnterTerminated();
+					}
+				}
+
+				if (Settings.TerminationThresholdTime.HasValue && !isZenOrTimeMode) {
+					if (TimerComponent.GetTimeRemaining() <= Settings.TerminationThresholdTime.Value.TotalSeconds) {
+						EnterTerminated();
+					}
+				}
+			}
 			
 			// Handle states
 			switch (CurrentState) {
@@ -238,7 +290,7 @@ namespace NeedyAugmentationMod {
 					goto case ActivatorState.WaitingForActivationInterruptable;
 				
 				case ActivatorState.WaitingForStartModules:
-					UpdateModulesSolvedAndActivationLimit();
+					UpdateModulesSolvedAndActivationLimitOncePerFrame();
 					int threshold = Settings.ActivationLimitSolves ?? 0;
 					if (modulesSolved >= threshold) {
 						EnterInterruptableActivationWait();
@@ -264,6 +316,11 @@ namespace NeedyAugmentationMod {
 					}
 					break;
 				
+				
+				case ActivatorState.Stopped:
+				case ActivatorState.Terminated:
+					// [nop]
+					break;
 			}
 		}
 		
@@ -279,6 +336,19 @@ namespace NeedyAugmentationMod {
 			initialActivationDelayLeft = TimeSpan.FromSeconds(activationTime);
 		}
 
+		public void EnterStopped() {
+			CurrentState = ActivatorState.Stopped;
+			NeedyComponent.SetHasStarted(true);
+			this.enabled = false; // prevent further Update calls; the component still exists
+		}
+		
+		public void EnterTerminated() {
+			CurrentState = ActivatorState.Terminated;
+			NeedyComponent.SetHasStarted(true);
+			NeedyComponent.TurnOff();
+			this.enabled = false; // prevent further Update calls; the component still exists
+		}
+		
 		/// <remarks>
 		/// When <paramref name="isInterrupted"/> is true,
 		/// the caller MUST activate the needy via StartRunning().
