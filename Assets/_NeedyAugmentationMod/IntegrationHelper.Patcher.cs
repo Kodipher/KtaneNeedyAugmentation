@@ -134,79 +134,73 @@ namespace NeedyAugmentationMod {
 				IEnumerable<CodeInstruction> instructions,
 				ILGenerator ilGenerator
 			) {
-			
-				
-				bool patched = false;
-				
 				MethodInfo resetAndStartMethod = needyComponentType.GetMethod("ResetAndStart", AllMethodFlags);
 				
-				List<CodeInstruction> instructionList = instructions.ToList();
-				for (int i = 0; i < instructionList.Count; i++) {
-					
-					// Unless `this.ResetAndStart()` ...
-					if (  
-					    !(
-						    instructionList[i].IsLdarg(0) &&
-							i + 1 < instructionList.Count &&
-							instructionList[i + 1].Is(OpCodes.Callvirt, resetAndStartMethod)
-					    )
-					) {
-						// ... leave as is
-						yield return instructionList[i];
-						continue;
-					}
-
-					// Wrap `this.ResetAndStart()` in a ResetAndStartGuardInfix check and notifier
-					//
-					// ```
-					// .maxstack 2
-					//	.locals init (
-					//	[0] bool V_0
-					// )
-					//
-					// IL_0000: nop
-					// IL_0001: ldarg.0      // this
-					// IL_0002: ldloca.s     V_0
-					// IL_0004: call         void NeedyAugmentationMod.IntegrationHelper/Patcher::Infix(object, bool&)
-					// IL_0009: ldloc.0      // V_0
-					// IL_000a: brfalse      IL_0017
-					// IL_000f: nop
-					// IL_0010: ldarg.0      // this
-					// IL_0011: call         instance void NeedyComponent::ResetAndStart()
-					// IL_0016: nop
-					// IL_0017: nop
-					// ``
-
-					// bool isActivating;
-					var isActivatingLocal = ilGenerator.DeclareLocal(typeof(bool));
-						
-					// ResetAndStartGuardInfix(this, ref isActivating);
-					yield return new CodeInstruction(OpCodes.Ldarg_0);
-					yield return new CodeInstruction(OpCodes.Ldloca_S, isActivatingLocal.LocalIndex);
-					yield return CodeInstruction.Call(typeof(Patcher), nameof(ResetAndStartGuardInfix));
-						
-					// if (!isActivatingLocal)
-					var skipCallLabel = ilGenerator.DefineLabel();
-					yield return new CodeInstruction(OpCodes.Ldloc_0);
-					yield return new CodeInstruction(OpCodes.Brfalse, skipCallLabel);
-					
-					// {
-					// this.ResetAndStart();
-					yield return instructionList[i];
-					yield return instructionList[i + 1];
-						
-					// }
-					yield return new CodeInstruction(OpCodes.Nop).WithLabels(skipCallLabel);
-
-					patched = true;
-
-					i++; // consume ldarg.0
-					continue; // consume call and continue
-				}
-
-				if (!patched) throw new ArgumentException("Could not find the original method call to wrap.");
+				return WrapInResetAndStartGuardTranspiler(
+					instructions,
+					ilGenerator,
+					// [
+					new CodeMatch(OpCodes.Ldarg_0),
+					new CodeMatch(OpCodes.Callvirt, resetAndStartMethod)
+					// ]
+				);
 			}
 			
+				
+			static IEnumerable<CodeInstruction> WrapInResetAndStartGuardTranspiler(
+				IEnumerable<CodeInstruction> instructions, 
+				ILGenerator ilGenerator,
+				params CodeMatch[] codeToMatch
+			) {
+				
+				// Wrap `this.ResetAndStart()` in a ResetAndStartGuardInfix check and notifier
+				//
+				// ```
+				//	.locals init (
+				//	[0] bool V_0
+				// )
+				//
+				// IL_0000: nop
+				// IL_0001: ldarg.0      // this
+				// IL_0002: ldloca.s     V_0
+				// IL_0004: call         void NeedyAugmentationMod.IntegrationHelper/Patcher::Infix(object, bool&)
+				// IL_0009: ldloc.0      // V_0
+				// IL_000a: brfalse      IL_0017
+				// IL_000f: nop
+				// IL_0010: ldarg.0      // this
+				// IL_0011: call         instance void NeedyComponent::ResetAndStart()
+				// IL_0016: nop
+				// IL_0017: nop
+				// ```
+				
+				CodeMatcher editor = new CodeMatcher(instructions, ilGenerator)
+										.MatchStartForward(codeToMatch)
+										.ThrowIfInvalid("Could not find the original method call to wrap");
+				
+				var isActivatingLocal = ilGenerator.DeclareLocal(typeof(bool)); // bool isActivating;
+				var skipCallLabel = ilGenerator.DefineLabel(); // (label skipCall)
+				
+				editor.InsertAndAdvance(
+					// ResetAndStartGuardInfix(this, ref isActivating);
+					new CodeInstruction(OpCodes.Ldarg_0),
+					new CodeInstruction(OpCodes.Ldloca_S, isActivatingLocal.LocalIndex),
+					CodeInstruction.Call(typeof(Patcher), nameof(ResetAndStartGuardInfix)),
+					
+					// if (!isActivatingLocal) {
+					new CodeInstruction(OpCodes.Ldloc_0),
+					new CodeInstruction(OpCodes.Brfalse, skipCallLabel)
+				);
+				
+				editor.Advance(offset: codeToMatch.Length); // this.ResetAndStart(); or equivalent
+				
+				// }
+				editor.InsertAndAdvance(
+					new CodeInstruction(OpCodes.Nop).WithLabels(skipCallLabel)
+				);
+
+				return editor.Instructions();
+			}
+
 			static void ResetAndStartGuardInfix(Component __instance, out bool isActivating) {
 				
 				AugmentedActivatorComponent activator;
