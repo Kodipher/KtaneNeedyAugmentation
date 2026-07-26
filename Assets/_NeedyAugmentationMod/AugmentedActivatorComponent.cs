@@ -311,8 +311,8 @@ namespace NeedyAugmentationMod {
 
 					initialActivationDelayLeft -= deltaTime;
 					if (initialActivationDelayLeft < TimeSpan.Zero) {
-						NeedyComponent.StartRunning();
 						CurrentState = ActivatorState.NormalBehavior;
+						NeedyComponent.StartRunning();
 					}
 					break;
 				
