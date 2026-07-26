@@ -134,7 +134,7 @@ namespace NeedyAugmentationMod {
 				IEnumerable<CodeInstruction> instructions,
 				ILGenerator ilGenerator
 			) {
-				MethodInfo resetAndStartMethod = needyComponentType.GetMethod("ResetAndStart", AllMethodFlags);
+				MethodInfo resetAndStartMethod = needyComponentType.GetMethod("ResetAndStart", ReflectionHelper.AllFlags);
 				
 				return WrapInResetAndStartGuardTranspiler(
 					instructions,
