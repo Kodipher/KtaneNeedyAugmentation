@@ -97,7 +97,7 @@ namespace NeedyAugmentationMod {
 				BombComplete = 5
 			}
 
-			/// <remarks>Might have unintended side effects, like </remarks>
+			/// <remarks>Might have unintended side effects, like invoking km needy events.</remarks>
 			public void ChangeState(NeedyState newState) {
 				if (changeStateMethod == null) {
 					changeStateMethod = (Action<int>)Delegate.CreateDelegate(typeof(Action<int>), NeedyComponent, "ChangeState");
