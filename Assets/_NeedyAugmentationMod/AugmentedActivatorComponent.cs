@@ -359,8 +359,6 @@ namespace NeedyAugmentationMod {
 				NeedyComponent.ChangeState(IntegrationHelper.NeedyComponentProxy.NeedyState.Cooldown);
 			}
 			NeedyComponent.SetHasStarted(true);
-
-			this.enabled = false; // prevent further Update calls; the component still exists
 		}
 		
 		public void EnterTerminated() {
