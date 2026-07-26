@@ -97,12 +97,18 @@ namespace NeedyAugmentationMod {
 				BombComplete = 5
 			}
 
+			/// <remarks>Might have unintended side effects, like </remarks>
 			public void ChangeState(NeedyState newState) {
 				if (changeStateMethod == null) {
 					changeStateMethod = (Action<int>)Delegate.CreateDelegate(typeof(Action<int>), NeedyComponent, "ChangeState");
 				}
 
 				changeStateMethod((int)newState);
+			}
+
+			/// <remarks>Used seldom. Implemented via Reflection.</remarks>
+			public NeedyState GetState() {
+				return (NeedyState)NeedyComponent.GetValue<int>("State");
 			}
 			
 			public void TurnOff(bool bombSolved = true /*Parameter is unused anyway*/) {
@@ -152,7 +158,7 @@ namespace NeedyAugmentationMod {
 				return bombGetSolvedComponentCountMethod();
 			}
 			
-			/// <remarks>Always uses Reflection.</remarks>
+			/// <remarks>Used seldom. Implemented via Reflection.</remarks>
 			public void SetHasStarted(bool value) {
 				NeedyComponent.SetValue("hasStarted", value);
 			}
