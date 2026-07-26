@@ -351,7 +351,15 @@ namespace NeedyAugmentationMod {
 
 		public void EnterStopped() {
 			CurrentState = ActivatorState.Stopped;
+
+			// If needy is still AwaitingActivation, enter eternal cooldown.
+			// This way the AwaitingActivation state guard will do the job
+			// Cooldown because entering this state does not invoke km needy events
+			if (NeedyComponent.GetState() == IntegrationHelper.NeedyComponentProxy.NeedyState.AwaitingActivation) {
+				NeedyComponent.ChangeState(IntegrationHelper.NeedyComponentProxy.NeedyState.Cooldown);
+			}
 			NeedyComponent.SetHasStarted(true);
+
 			this.enabled = false; // prevent further Update calls; the component still exists
 		}
 		
