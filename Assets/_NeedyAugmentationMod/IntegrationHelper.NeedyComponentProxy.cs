@@ -67,6 +67,8 @@ namespace NeedyAugmentationMod {
 			[CanBeNull] Action<int> changeStateMethod = null;
 			[CanBeNull] Action<bool> turnOffMethod = null;
 			[CanBeNull] Func<int> secondsBeforeForcedActivationFieldGetter = null;
+			[CanBeNull] Func<float> resetDelayMinFieldGetter = null;
+			[CanBeNull] Func<float> resetDelayMaxFieldGetter = null;
 			[CanBeNull] Func<int> bombGetSolvableComponentCountMethod = null;
 			[CanBeNull] Func<int> bombGetSolvedComponentCountMethod = null;
 			
@@ -125,13 +127,36 @@ namespace NeedyAugmentationMod {
 					secondsBeforeForcedActivationFieldGetter = () => 90; // prevent throwing exceptions every frame
 					
 					FieldInfo fieldInfo = NeedyComponent.GetType().GetField("SecondsBeforeForcedActivation");
-					
 					var instanceExp = Expression.Constant(NeedyComponent);
 					var fieldGetExp = Expression.Field(instanceExp, fieldInfo);
 					secondsBeforeForcedActivationFieldGetter = Expression.Lambda<Func<int>>(fieldGetExp).Compile();
 				}
 				
 				return secondsBeforeForcedActivationFieldGetter();
+			}
+			
+			public float GetResetDelayMin() {
+
+				if (resetDelayMinFieldGetter == null) {
+					FieldInfo fieldInfo = NeedyComponent.GetType().GetField("ResetDelayMin");
+					var instanceExp = Expression.Constant(NeedyComponent);
+					var fieldGetExp = Expression.Field(instanceExp, fieldInfo);
+					resetDelayMinFieldGetter = Expression.Lambda<Func<float>>(fieldGetExp).Compile();
+				}
+				
+				return resetDelayMinFieldGetter();
+			}
+			
+			public float GetResetDelayMax() {
+
+				if (resetDelayMaxFieldGetter == null) {
+					FieldInfo fieldInfo = NeedyComponent.GetType().GetField("ResetDelayMax");
+					var instanceExp = Expression.Constant(NeedyComponent);
+					var fieldGetExp = Expression.Field(instanceExp, fieldInfo);
+					resetDelayMaxFieldGetter = Expression.Lambda<Func<float>>(fieldGetExp).Compile();
+				}
+				
+				return resetDelayMaxFieldGetter();
 			}
 			
 			public int BombCountSolvableComponents() {
