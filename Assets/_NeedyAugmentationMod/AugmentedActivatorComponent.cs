@@ -27,7 +27,7 @@ namespace NeedyAugmentationMod {
 
 		static readonly object cacheDictLock = new object();
 
-		// Keys: object ids, the components are attached to
+		// Keys: NeedyComponent ids, the components are attached with
 		static readonly Dictionary<int, WeakReference> instanceCache = new Dictionary<int, WeakReference>();
 
 		public static void ClearDeadCacheReferences() {
@@ -94,7 +94,7 @@ namespace NeedyAugmentationMod {
 				component.Settings = augmentation;
 				component.NeedyComponent = needyProxy;
 				
-				int id = gameObject.GetInstanceID();
+				int id = needyProxy.NeedyComponent.GetInstanceID();
 				instanceCache[id] = new WeakReference(component);
 				
 				return component;
