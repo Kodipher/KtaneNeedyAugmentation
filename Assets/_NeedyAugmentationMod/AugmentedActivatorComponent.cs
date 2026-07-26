@@ -359,6 +359,13 @@ namespace NeedyAugmentationMod {
 				NeedyComponent.ChangeState(IntegrationHelper.NeedyComponentProxy.NeedyState.Cooldown);
 			}
 			NeedyComponent.SetHasStarted(true);
+
+			if (
+				!Settings.TerminationThresholdModules.HasValue && // Let termination happen, if it is possible
+				!Settings.TerminationThresholdTime.HasValue
+			) {
+				this.enabled = false; // prevent further Update calls; the component still exists
+			}
 		}
 		
 		public void EnterTerminated() {
