@@ -42,7 +42,7 @@ namespace NeedyAugmentationMod {
 			 * ComponentStrikeEvent,ComponentPassEvent -> [state guard] -> PlayerChangedBomb(tinyDelay);
 			 * PlayerChangedBomb -> !!! -> [coroutine] -> [state guard] -> [rng/dupe guard] -> StartRunning();
 			 * StartRunning -> [hasStarted guard] -> !!! ResetAndStart();
-			 * WaitAndResetRoutine -> [coroutine] -> ChangeState(Cooldown) -> !!! ResetAndStart()
+			 * WaitAndResetRoutine -> !!! -> [coroutine] -> ChangeState(Cooldown) -> ResetAndStart()
 			 * ResetAndStart -> ChangeState(Running)
 			 * OnSolved,OnTimerExpired -> [shouldReset check] -> [if true] WaitAndResetRoutine() / [if false] ChangeState(Terminated)
 			 * TurnOff -> !!! -> ChangeState(BombComplete)
@@ -69,7 +69,7 @@ namespace NeedyAugmentationMod {
 				// This patch is a bit dirty, but this way you do not need a transpiler
 				original = needyComponentType.GetMethod("PlayerChangedBomb", ReflectionHelper.AllFlags);
 				prefix = typeof(Patcher).GetMethod(nameof(PlayerChangedBombPrefix), ReflectionHelper.AllFlags);
-				harmony.Patch(original, prefix: new HarmonyMethod(prefix) { priority = Priority.VeryLow });
+				harmony.Patch(original, prefix: new HarmonyMethod(prefix));
 				
 				// StartRunning
 				// patch: wrap ResetAndStart in ResetAndStartGuardInfix
@@ -79,13 +79,12 @@ namespace NeedyAugmentationMod {
 				transpiler = typeof(Patcher).GetMethod(nameof(StartRunningResetAndStartGuardTranspiler), ReflectionHelper.AllFlags);
 				harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
 				
-				/*
-				// <WaitAndResetRoutine>c__Iterator0.MoveNext
-				// patch 1: the same guard as for StartRunning
-				original = needyComponentType.GetMethod(nameof(IEnumerator.MoveNext), ReflectionHelper.AllFlags);
-				transpiler = typeof(Patcher).GetMethod(nameof(WaitAndResetRoutineMoveNextGuardTranspiler), ReflectionHelper.AllFlags);
-				harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
-				 */
+				// WaitAndResetRoutine
+				// patch: if AugmentedActivatorComponent exists, replace iterator
+				// with one that has an activation guard and cooldown modification
+				original = needyComponentType.GetMethod("WaitAndResetRoutine", ReflectionHelper.AllFlags);
+				prefix = typeof(Patcher).GetMethod(nameof(WaitAndResetRoutinePrefix), ReflectionHelper.AllFlags);
+				harmony.Patch(original, prefix: new HarmonyMethod(prefix));
 				
 				// TurnOff
 				// This method is called by this mod and when the bomb is solved or explodes
@@ -210,6 +209,38 @@ namespace NeedyAugmentationMod {
 				}
 				
 				activator.GuardActivationBySolves(out isActivating);
+			}
+			
+			static bool WaitAndResetRoutinePrefix(Component __instance, ref IEnumerator __result) {
+
+				AugmentedActivatorComponent activator;
+				if (!AugmentedActivatorComponent.TryGetCached(__instance.GetInstanceID(), out activator)) {
+					// No component -- continue like normal
+					return true;
+				}
+
+				// Replace coroutine with the patched one
+				__result = WaitAndResetReplacementCoroutine(__instance, activator);
+				return false;
+			}
+
+			static IEnumerator WaitAndResetReplacementCoroutine(Component __instance, AugmentedActivatorComponent activator) {
+
+				var proxy = activator.NeedyComponent;
+				
+				// Mimic existing code
+				proxy.ChangeState(NeedyComponentProxy.NeedyState.Cooldown);
+				float baseDelay = UnityEngine.Random.Range(proxy.GetResetDelayMin(), proxy.GetResetDelayMax());
+				
+				// Modify the cooldown
+				float newDelay = activator.ModifyCooldown(baseDelay);
+				yield return new WaitForSeconds(newDelay);
+				
+				// Activate but with a guard
+				bool isActivating;
+				ResetAndStartGuardInfix(__instance, out isActivating);
+				
+				if (isActivating) proxy.ResetAndStart();
 			}
 			
 			#endregion

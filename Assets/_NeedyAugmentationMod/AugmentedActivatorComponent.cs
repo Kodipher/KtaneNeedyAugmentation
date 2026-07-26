@@ -143,7 +143,7 @@ namespace NeedyAugmentationMod {
 		}
 
 		/// <returns>seconds</returns>
-		float ModifyCooldown(float cooldownSeconds) {
+		public float ModifyCooldown(float cooldownSeconds) {
 			float result = cooldownSeconds;
 			if (Settings.CooldownMultiplier.HasValue) result *= Settings.CooldownMultiplier.Value;
 			if (Settings.CooldownAddend.HasValue) result += Settings.CooldownAddend.Value;
