@@ -42,7 +42,7 @@ namespace NeedyAugmentationMod {
 			 * ComponentStrikeEvent,ComponentPassEvent -> [state guard] -> PlayerChangedBomb(tinyDelay);
 			 * PlayerChangedBomb -> !!! -> [coroutine] -> [state guard] -> [rng/dupe guard] -> StartRunning();
 			 * StartRunning -> [hasStarted guard] -> !!! ResetAndStart();
-			 * WaitAndResetRoutine -> [coroutine] -> ChangeState(Cooldown) -> ResetAndStart()
+			 * WaitAndResetRoutine -> [coroutine] -> ChangeState(Cooldown) -> !!! ResetAndStart()
 			 * ResetAndStart -> ChangeState(Running)
 			 * OnSolved,OnTimerExpired -> [shouldReset check] -> [if true] WaitAndResetRoutine() / [if false] ChangeState(Terminated)
 			 * TurnOff -> !!! -> ChangeState(BombComplete)
@@ -79,6 +79,11 @@ namespace NeedyAugmentationMod {
 				transpiler = typeof(Patcher).GetMethod(nameof(StartRunningTranspiler), ReflectionHelper.AllFlags);
 				harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
 				
+				// <WaitAndResetRoutine>c__Iterator0.MoveNext
+				// patch 1: the same guard as for StartRunning
+				original = needyComponentType.GetMethod(nameof(IEnumerator.MoveNext), ReflectionHelper.AllFlags);
+				transpiler = typeof(Patcher).GetMethod(nameof(WaitAndResetRoutineMoveNextGuardTranspiler), ReflectionHelper.AllFlags);
+				harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
 				
 				// TurnOff
 				// This method is called by this mod and when the bomb is solved or explodes
@@ -146,7 +151,24 @@ namespace NeedyAugmentationMod {
 				);
 			}
 			
+			static IEnumerable<CodeInstruction> WaitAndResetRoutineMoveNextGuardTranspiler(
+				IEnumerable<CodeInstruction> instructions,
+				ILGenerator ilGenerator
+			) {
+				MethodInfo resetAndStartMethod = needyComponentType.GetMethod("ResetAndStart", ReflectionHelper.AllFlags);
+				FieldInfo iteratorInstanceField = needyComponentWaitAndResetIteratorType.GetField("$this", ReflectionHelper.AllFlags);
 				
+				return WrapInResetAndStartGuardTranspiler(
+					instructions,
+					ilGenerator,
+					// [
+					new CodeMatch(OpCodes.Ldarg_0),
+					new CodeMatch(OpCodes.Ldfld, iteratorInstanceField),
+					new CodeMatch(OpCodes.Callvirt, resetAndStartMethod)
+					// ]
+				);
+			}
+
 			static IEnumerable<CodeInstruction> WrapInResetAndStartGuardTranspiler(
 				IEnumerable<CodeInstruction> instructions, 
 				ILGenerator ilGenerator,
@@ -165,12 +187,13 @@ namespace NeedyAugmentationMod {
 				// IL_0002: ldloca.s     V_0
 				// IL_0004: call         void NeedyAugmentationMod.IntegrationHelper/Patcher::Infix(object, bool&)
 				// IL_0009: ldloc.0      // V_0
-				// IL_000a: brfalse      IL_0017
+				// IL_000a: brfalse      IL_0016
 				// IL_000f: nop
+				// // [                  // codeToMatch 
 				// IL_0010: ldarg.0      // this
 				// IL_0011: call         instance void NeedyComponent::ResetAndStart()
+				// // ]
 				// IL_0016: nop
-				// IL_0017: nop
 				// ```
 				
 				CodeMatcher editor = new CodeMatcher(instructions, ilGenerator)
@@ -181,7 +204,7 @@ namespace NeedyAugmentationMod {
 				var skipCallLabel = ilGenerator.DefineLabel(); // (label skipCall)
 				
 				editor.InsertAndAdvance(
-					// ResetAndStartGuardInfix(this, ref isActivating);
+					// ResetAndStartGuardInfix(this, &isActivating);
 					new CodeInstruction(OpCodes.Ldarg_0),
 					new CodeInstruction(OpCodes.Ldloca_S, isActivatingLocal.LocalIndex),
 					CodeInstruction.Call(typeof(Patcher), nameof(ResetAndStartGuardInfix)),

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 using Rephidock.GeneralUtilities.Collections;
 using Rephidock.GeneralUtilities.Reflection;
@@ -29,6 +30,12 @@ namespace NeedyAugmentationMod {
 		static readonly Type needyCapacitorType = ReflectionHelper.FindGameType("NeedyDischargeComponent");
 		static readonly Type needyKnobType = ReflectionHelper.FindGameType("NeedyKnobComponent");
 		static readonly Type needyVentType = ReflectionHelper.FindGameType("NeedyVentComponent");
+		
+		static readonly Type needyComponentWaitAndResetIteratorType = needyComponentType
+																			.GetNestedType(
+																				"<WaitAndResetRoutine>c__Iterator0", 
+																				BindingFlags.NonPublic
+																			);
 		
 		static readonly Lazy<IDictionary<string, object>> moddedApi = 
 								new Lazy<IDictionary<string, object>>(
