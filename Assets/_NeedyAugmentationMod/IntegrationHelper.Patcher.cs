@@ -76,14 +76,16 @@ namespace NeedyAugmentationMod {
 				// The infix checks if AugmentedActivatorComponent exists and, if it does,
 				// notifies it that a needy wants to activate (through a guard call) 
 				original = needyComponentType.GetMethod("StartRunning", ReflectionHelper.AllFlags);
-				transpiler = typeof(Patcher).GetMethod(nameof(StartRunningTranspiler), ReflectionHelper.AllFlags);
+				transpiler = typeof(Patcher).GetMethod(nameof(StartRunningResetAndStartGuardTranspiler), ReflectionHelper.AllFlags);
 				harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
 				
+				/*
 				// <WaitAndResetRoutine>c__Iterator0.MoveNext
 				// patch 1: the same guard as for StartRunning
 				original = needyComponentType.GetMethod(nameof(IEnumerator.MoveNext), ReflectionHelper.AllFlags);
 				transpiler = typeof(Patcher).GetMethod(nameof(WaitAndResetRoutineMoveNextGuardTranspiler), ReflectionHelper.AllFlags);
 				harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
+				 */
 				
 				// TurnOff
 				// This method is called by this mod and when the bomb is solved or explodes
@@ -135,45 +137,11 @@ namespace NeedyAugmentationMod {
 				return true;
 			}
 
-			static IEnumerable<CodeInstruction> StartRunningTranspiler(
+			static IEnumerable<CodeInstruction> StartRunningResetAndStartGuardTranspiler(
 				IEnumerable<CodeInstruction> instructions,
 				ILGenerator ilGenerator
 			) {
 				MethodInfo resetAndStartMethod = needyComponentType.GetMethod("ResetAndStart", ReflectionHelper.AllFlags);
-				
-				return WrapInResetAndStartGuardTranspiler(
-					instructions,
-					ilGenerator,
-					// [
-					new CodeMatch(OpCodes.Ldarg_0),
-					new CodeMatch(OpCodes.Callvirt, resetAndStartMethod)
-					// ]
-				);
-			}
-			
-			static IEnumerable<CodeInstruction> WaitAndResetRoutineMoveNextGuardTranspiler(
-				IEnumerable<CodeInstruction> instructions,
-				ILGenerator ilGenerator
-			) {
-				MethodInfo resetAndStartMethod = needyComponentType.GetMethod("ResetAndStart", ReflectionHelper.AllFlags);
-				FieldInfo iteratorInstanceField = needyComponentWaitAndResetIteratorType.GetField("$this", ReflectionHelper.AllFlags);
-				
-				return WrapInResetAndStartGuardTranspiler(
-					instructions,
-					ilGenerator,
-					// [
-					new CodeMatch(OpCodes.Ldarg_0),
-					new CodeMatch(OpCodes.Ldfld, iteratorInstanceField),
-					new CodeMatch(OpCodes.Callvirt, resetAndStartMethod)
-					// ]
-				);
-			}
-
-			static IEnumerable<CodeInstruction> WrapInResetAndStartGuardTranspiler(
-				IEnumerable<CodeInstruction> instructions, 
-				ILGenerator ilGenerator,
-				params CodeMatch[] codeToMatch
-			) {
 				
 				// Wrap `this.ResetAndStart()` in a ResetAndStartGuardInfix check and notifier
 				//
@@ -189,15 +157,18 @@ namespace NeedyAugmentationMod {
 				// IL_0009: ldloc.0      // V_0
 				// IL_000a: brfalse      IL_0016
 				// IL_000f: nop
-				// // [                  // codeToMatch 
+				//
 				// IL_0010: ldarg.0      // this
 				// IL_0011: call         instance void NeedyComponent::ResetAndStart()
-				// // ]
+				//
 				// IL_0016: nop
 				// ```
 				
 				CodeMatcher editor = new CodeMatcher(instructions, ilGenerator)
-										.MatchStartForward(codeToMatch)
+										.MatchStartForward(
+											new CodeMatch(OpCodes.Ldarg_0),
+											new CodeMatch(OpCodes.Callvirt, resetAndStartMethod)
+										)
 										.ThrowIfInvalid("Could not find the original method call to wrap");
 				
 				var isActivatingLocal = ilGenerator.DeclareLocal(typeof(bool)); // bool isActivating;
@@ -209,12 +180,12 @@ namespace NeedyAugmentationMod {
 					new CodeInstruction(OpCodes.Ldloca_S, isActivatingLocal.LocalIndex),
 					CodeInstruction.Call(typeof(Patcher), nameof(ResetAndStartGuardInfix)),
 					
-					// if (!isActivatingLocal) {
+					// if (isActivatingLocal) {
 					new CodeInstruction(OpCodes.Ldloc_0),
 					new CodeInstruction(OpCodes.Brfalse, skipCallLabel)
 				);
 				
-				editor.Advance(offset: codeToMatch.Length); // this.ResetAndStart(); or equivalent
+				editor.Advance(offset: 2); // this.ResetAndStart();
 				
 				// }
 				editor.InsertAndAdvance(
@@ -223,7 +194,7 @@ namespace NeedyAugmentationMod {
 
 				return editor.Instructions();
 			}
-
+			
 			static void ResetAndStartGuardInfix(Component __instance, out bool isActivating) {
 				
 				AugmentedActivatorComponent activator;
@@ -240,7 +211,7 @@ namespace NeedyAugmentationMod {
 				
 				activator.GuardActivationBySolves(out isActivating);
 			}
-
+			
 			#endregion
 			
 		}
