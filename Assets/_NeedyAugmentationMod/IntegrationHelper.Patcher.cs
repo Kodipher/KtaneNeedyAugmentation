@@ -49,8 +49,6 @@ namespace NeedyAugmentationMod {
 			 *
 			 */
 			
-			public const BindingFlags AllMethodFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-			
 			/// <remarks>May throw.</remarks>
 			static void Patch() {
 
@@ -62,31 +60,31 @@ namespace NeedyAugmentationMod {
 				
 				// OnBombTimerTick
 				// patch: if AugmentedActivatorComponent exists, let it do the waiting instead
-				original = needyComponentType.GetMethod("OnBombTimerTick", AllMethodFlags);
-				prefix = typeof(Patcher).GetMethod(nameof(OnBombTimerTickPrefix), AllMethodFlags);
+				original = needyComponentType.GetMethod("OnBombTimerTick", ReflectionHelper.AllFlags);
+				prefix = typeof(Patcher).GetMethod(nameof(OnBombTimerTickPrefix), ReflectionHelper.AllFlags);
 				harmony.Patch(original, prefix: new HarmonyMethod(prefix));
 				
 				// PlayerChangedBomb
 				// patch: if AugmentedActivatorComponent exists, add its state guard
 				// This patch is a bit dirty, but this way you do not need a transpiler
-				original = needyComponentType.GetMethod("PlayerChangedBomb", AllMethodFlags);
-				prefix = typeof(Patcher).GetMethod(nameof(PlayerChangedBombPrefix), AllMethodFlags);
+				original = needyComponentType.GetMethod("PlayerChangedBomb", ReflectionHelper.AllFlags);
+				prefix = typeof(Patcher).GetMethod(nameof(PlayerChangedBombPrefix), ReflectionHelper.AllFlags);
 				harmony.Patch(original, prefix: new HarmonyMethod(prefix) { priority = Priority.VeryLow });
 				
 				// StartRunning
 				// patch: wrap ResetAndStart in ResetAndStartGuardInfix
 				// The infix checks if AugmentedActivatorComponent exists and, if it does,
 				// notifies it that a needy wants to activate (through a guard call) 
-				original = needyComponentType.GetMethod("StartRunning", AllMethodFlags);
-				transpiler = typeof(Patcher).GetMethod(nameof(GuardResetAndStartTranspiler), AllMethodFlags);
+				original = needyComponentType.GetMethod("StartRunning", ReflectionHelper.AllFlags);
+				transpiler = typeof(Patcher).GetMethod(nameof(StartRunningTranspiler), ReflectionHelper.AllFlags);
 				harmony.Patch(original, transpiler: new HarmonyMethod(transpiler));
 				
 				
 				// TurnOff
 				// This method is called by this mod and when the bomb is solved or explodes
 				// patch: prevent emitting the deactivation event twice for modded modules
-				original = needyComponentType.GetMethod("TurnOff", AllMethodFlags);
-				prefix = typeof(Patcher).GetMethod(nameof(TurnOffPrefix), AllMethodFlags);
+				original = needyComponentType.GetMethod("TurnOff", ReflectionHelper.AllFlags);
+				prefix = typeof(Patcher).GetMethod(nameof(TurnOffPrefix), ReflectionHelper.AllFlags);
 				harmony.Patch(original, prefix: new HarmonyMethod(prefix));
 
 				isPatched = true;
@@ -131,8 +129,12 @@ namespace NeedyAugmentationMod {
 				// Interrupting...
 				return true;
 			}
+
+			static IEnumerable<CodeInstruction> StartRunningTranspiler(
+				IEnumerable<CodeInstruction> instructions,
+				ILGenerator ilGenerator
+			) {
 			
-			static IEnumerable<CodeInstruction> GuardResetAndStartTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGenerator) {
 				
 				bool patched = false;
 				
