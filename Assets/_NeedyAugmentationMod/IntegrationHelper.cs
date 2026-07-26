@@ -30,6 +30,8 @@ namespace NeedyAugmentationMod {
 		static readonly Type needyKnobType = ReflectionHelper.FindGameType("NeedyKnobComponent");
 		static readonly Type needyVentType = ReflectionHelper.FindGameType("NeedyVentComponent");
 		
+		static readonly Type needyStateEnumType = needyComponentType.GetNestedType("NeedyStateEnum", ReflectionHelper.AllFlags);
+		
 		static readonly Lazy<IDictionary<string, object>> moddedApi = 
 								new Lazy<IDictionary<string, object>>(
 									() => GameObject.Find("ModdedAPI_Info").GetComponent<IDictionary<string, object>>()

@@ -102,7 +102,16 @@ namespace NeedyAugmentationMod {
 			/// <remarks>Might have unintended side effects, like invoking km needy events.</remarks>
 			public void ChangeState(NeedyState newState) {
 				if (changeStateMethod == null) {
-					changeStateMethod = (Action<int>)Delegate.CreateDelegate(typeof(Action<int>), NeedyComponent, "ChangeState");
+
+					MethodInfo methodInfo = needyComponentType.GetMethod("ChangeState", ReflectionHelper.AllFlags);
+					if (methodInfo == null) throw new NullReferenceException("Could not find the ChangeState method.");
+					
+					var instanceExp = Expression.Constant(NeedyComponent);
+					var parameterExp = Expression.Parameter(typeof(int), "newState");
+					var castExp = Expression.Convert(parameterExp, needyStateEnumType);
+					var callExp = Expression.Call(instanceExp, methodInfo, castExp);
+					changeStateMethod = Expression.Lambda<Action<int>>(callExp, parameterExp).Compile();
+					//changeStateMethod = (Action<int>)Delegate.CreateDelegate(typeof(Action<int>), NeedyComponent, "ChangeState");
 				}
 
 				changeStateMethod((int)newState);
