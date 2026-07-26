@@ -227,10 +227,10 @@ namespace NeedyAugmentationMod {
 			modulesSolvedUpdatedThisFrame = false;
 			
 			// Check if activator needs to stop or terminate
-			if (!IsInStoppedState()) {
+			if (CurrentState != ActivatorState.Terminated) {
 				
 				// Check for stop
-				if (CurrentState != ActivatorState.Terminated) {
+				if (CurrentState != ActivatorState.Stopped) {
 					
 					if (Settings.StopThresholdModules.HasValue) {
 						
