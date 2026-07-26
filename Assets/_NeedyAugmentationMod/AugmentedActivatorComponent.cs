@@ -291,7 +291,7 @@ namespace NeedyAugmentationMod {
 				
 				case ActivatorState.WaitingForStartModules:
 					UpdateModulesSolvedAndActivationLimitOncePerFrame();
-					int threshold = Settings.ActivationLimitSolves ?? 0;
+					int threshold = Settings.StartThresholdModules ?? 0;
 					if (modulesSolved >= threshold) {
 						EnterInterruptableActivationWait();
 					}
