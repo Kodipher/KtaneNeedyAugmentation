@@ -154,6 +154,7 @@ namespace NeedyAugmentationMod {
 		
 		static readonly Regex secondsPropertyRegex = new Regex($@"^({NumberPattern})\s*s?$", RegexOptions.Singleline);
 		static readonly Regex secondsOrModulesPropertyRegex = new Regex($@"^({NumberPattern})\s*(s|m)$", RegexOptions.Singleline);
+		static readonly Regex secondsOrModulesLeftPropertyRegex = new Regex($@"^({NumberPattern})\s*(s|m)l$", RegexOptions.Singleline);
 		static readonly Regex countdownPropertyRegex = new Regex($@"^(?:\*\s*({NumberPattern})\s*)?(?:(\+|-)\s*({NumberPattern}))?$", RegexOptions.Singleline);
 		static readonly Regex activationsPropertyRegex = new Regex($@"^({NumberPattern})\s*(?:(\+|-)\s*({NumberPattern})\s*(?:\/\s*({NumberPattern})\s*)?)?$", RegexOptions.Singleline);
 		
@@ -257,7 +258,7 @@ namespace NeedyAugmentationMod {
 				
 				case "term": {
 					
-					var match = secondsOrModulesPropertyRegex.Match(expression);
+					var match = secondsOrModulesLeftPropertyRegex.Match(expression);
 					if (!match.Success) throw new FormatException($"Invalid expression for \"term\" for \"{moduleId}\"");
 					
 					char suffix = match.Groups[2].ToString()[0];
@@ -283,7 +284,7 @@ namespace NeedyAugmentationMod {
 				
 				case "stop": {
 					
-					var match = secondsOrModulesPropertyRegex.Match(expression);
+					var match = secondsOrModulesLeftPropertyRegex.Match(expression);
 					if (!match.Success) throw new FormatException($"Invalid expression for \"stop\" for \"{moduleId}\"");
 					
 					char suffix = match.Groups[2].ToString()[0];
