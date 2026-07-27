@@ -150,13 +150,15 @@ namespace NeedyAugmentationMod {
 		}
 
 		
-		const string NumberPattern = @"[\+\-]?[.0-9]*"; // let int.Parse throw in case of decimal points
+		const RegexOptions PropertyRegexOptions = RegexOptions.Singleline | RegexOptions.IgnoreCase;
 		
-		static readonly Regex secondsPropertyRegex = new Regex($@"^({NumberPattern})\s*s?$", RegexOptions.Singleline);
-		static readonly Regex secondsOrModulesPropertyRegex = new Regex($@"^({NumberPattern})\s*(s|m)$", RegexOptions.Singleline);
-		static readonly Regex secondsOrModulesLeftPropertyRegex = new Regex($@"^({NumberPattern})\s*(s|m)l$", RegexOptions.Singleline);
-		static readonly Regex countdownPropertyRegex = new Regex($@"^(?:\*\s*({NumberPattern})\s*)?(?:(\+|-)\s*({NumberPattern}))?$", RegexOptions.Singleline);
-		static readonly Regex activationsPropertyRegex = new Regex($@"^({NumberPattern})\s*(?:(\+|-)\s*({NumberPattern})\s*(?:\/\s*({NumberPattern})\s*)?)?$", RegexOptions.Singleline);
+		const string NumberPattern = @"[\+\-]?[.0-9]*"; // let int.Parse throw in case of decimal points
+
+		static readonly Regex secondsPropertyRegex = new Regex($@"^({NumberPattern})\s*s?$", PropertyRegexOptions);
+		static readonly Regex secondsOrModulesPropertyRegex = new Regex($@"^({NumberPattern})\s*(s|m)$", PropertyRegexOptions);
+		static readonly Regex secondsOrModulesLeftPropertyRegex = new Regex($@"^({NumberPattern})\s*(s|m)l$", PropertyRegexOptions);
+		static readonly Regex countdownPropertyRegex = new Regex($@"^(?:\*\s*({NumberPattern})\s*)?(?:(\+|-)\s*({NumberPattern}))?$", PropertyRegexOptions);
+		static readonly Regex activationsPropertyRegex = new Regex($@"^({NumberPattern})\s*(?:(\+|-)\s*({NumberPattern})\s*(?:\/\s*({NumberPattern})\s*)?)?$", PropertyRegexOptions);
 		
 		/// <param name="currentSet">The set to assign the property to.</param>
 		/// <param name="property">Property key to assign. Lowercase and trimmed.</param>
