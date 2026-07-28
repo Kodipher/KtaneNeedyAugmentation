@@ -357,6 +357,37 @@
                     </tbody>
                 </table>
 
+                <h3>Examples</h3>
+                
+                <ul>
+                    <li>
+                        <code><i>module</i>:cd=+60;</code><br>
+                        Adds an extra minute to the module’s reactivation cooldown.
+                    </li>
+                    <li>
+                        <code><i>module</i>:cd=*0+60;</code><br>
+                        Forces a module’s cooldown to always be 60 seconds.
+                    </li>
+                    <li>
+                        <code><i>module</i>:term=1ml;</code><br>
+                        Completely disables a given module, when only one unsolved
+                        module is left. Can be used to disable
+                        needy modules during the input phase of a boss module.
+                    </li>
+                    <li>
+                        <code><i>module</i>:acttime=0,cd=*0+0.25,acts=0+1;</code><br>
+                        Makes a module activate after a regular module is solved, 
+                        demanding attention like a boss module would.
+                    </li>
+                    <li>
+                        <code><i>module1</i>:stop=180sl;</code><br>
+                        <code><i>module2</i>:start=120s,acttime=0s;</code><br>
+                        If the bomb starts with 5 minutes (300 seconds) on the countdown timer,
+                        then at 3 minutes (180 seconds) remaining, the first needy module will stop activating
+                        and the second needy module will take its place.
+                    </li>
+                </ul>
+
             </div>
             <div class="page-footer relative-footer">Page 4 of 4</div>
         </div>
