@@ -59,7 +59,7 @@
 
                 <h3>When Configured</h3>
                 <ul>
-                    <li>The display will read <b>“AUGMENTED”</b>, if augmentations are in effect.</li>
+                    <li>The display will read <b>“AUGMENTED”</b> if augmentations are in effect.</li>
                     <li>The display will read <b>“UNCHANGED”</b> otherwise.</li>
                     <li>Needy&nbsp;Augmentation itself will never activate.</li>
                     <li>
@@ -69,7 +69,7 @@
                 </ul>
 
                 <p class="comment">
-                    If the configuration has an error, it is logged and a strike sound also plays.<br>
+                    If the configuration has an error, it will be logged and a strike sound will play.<br>
                     No actual strike is recorded and no augmentations are made,
                     however the module will still not activate.
                 </p>
@@ -107,13 +107,13 @@
                     <li>
                         <u>This module is only a tool</u>. It is still up
                         to you, as the mission creator, to make missions fun.
-                        You do not have to use it either, if you do not want to.
+                        You do not have to use it if you do not want to.
                     </li>
                 </ul>
                 <p class="comment">
                     † One Needy&nbsp;Augmentation module can augment multiple needy modules, 
                     but they have to be on the same bomb.<br>
-                    Yoo may need to use multiple Needy&nbsp;Augmentation modules in the same mission,
+                    You may need to use multiple Needy&nbsp;Augmentation modules in the same mission
                     in cases of multiple bombs.
                 </p>
                 <p class="comment">
@@ -137,7 +137,7 @@
                             [/NeedyAugmentation]<br>
                         </code>
                     </li>
-                    <li>Properties are separated by commas, modules &mdash; by semicolons.</li>
+                    <li>Properties are separated by commas, modules are separated by semicolons.</li>
                     <li>
                         Consider using <code>&lt;hidden&gt;</code> for players with the 
                         <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3127095798&searchtext">Description Hider</a>
@@ -152,7 +152,7 @@
                         You may specify the same ID multiple times to augment multiple copies 
                         of the same needy differently. The augmentations will be picked in order.
                     </li>
-                    <li class="space-after">Augmentations for modules, which could not be found, are skipped.</li>
+                    <li class="space-after">Augmentations for modules that could not be found are skipped.</li>
 
                     <li><code>*</code> is a wildcard and will affect all otherwise unspecified needy modules.</li>
                     <li class="space-after">Without the wildcard, unspecified modules retain their original behavior.</li>
@@ -269,11 +269,11 @@
                                 <p class="comment">Default: start when the bomb starts.</p>
                                 <ul>
                                     <li>
-                                        Prevents the module from activating, until either
+                                        Prevents the module from activating until either
                                         <code><i>modules</i></code> regular modules are solved
                                         or <code><i>seconds</i></code> seconds pass.
                                     </li>
-                                    <li>The module behaves, as if the bomb was just started, afterwards.</li>
+                                    <li>The module behaves as if the bomb was just started afterwards.</li>
                                     <li>
                                         <code><i>seconds</i></code> is a float (decimal number).
                                     </li>
