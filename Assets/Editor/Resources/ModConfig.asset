@@ -15,8 +15,9 @@ MonoBehaviour:
   title: Need Augmentation
   author: Kodipher
   description: "A needy, made to be a utility to balance other needy modules.\nMade
-    as a module, so that you can force it to appear in your missions.\n\nRefer to
-    the manual for all possible augmentations.\n\nModule ID: needyAugmentation\r\n\r\nManual
+    as a module, so that you can force it to appear in your missions.\n\nThe module
+    has to be configured through the mission description, otherwise it acts like Refill
+    that Beer!.\nSee the manual for all possible augmentations.\n\nModule ID: needyAugmentation\r\n\r\nManual
     HTML: [url=https://ktane.timwi.de/HTML/Needy%20Augmentation.html] > link < [/url]\r\nManual
     PDF: [url=https://ktane.timwi.de/PDF/Needy%20Augmentation.pdf] > link < [/url]\r\n\nManual
     PDF mirror: [url=https://github.com/Kodipher/KtaneNeedyAugmentation/blob/main/Manual/pdfs/NeedyModules/Needy%20Augmentation.pdf]
