@@ -1,0 +1,15 @@
+{
+  "Contributors": { "Developer": [ "Kodipher" ] },
+  "DefuserDifficulty": "VeryEasy",
+  "Description": "Alters when needy modules activate. Acts like Refill that Beer! if not configured. Tags: needy, grey-background, refill, augmented, no config, mission-specific",
+  "ExpertDifficulty": "VeryEasy",
+  "ModuleID": "needyAugmentation",
+  "Name": "Needy Augmentation",
+  "Origin": "Mods",
+  "Published": null,
+  "SortKey": "NEEDY AUGMENTATION",
+  "SourceUrl": "https://github.com/Kodipher/KtaneNeedyAugmentation",
+  "SteamID": null,
+  "Symbol": "Naug",
+  "Type": "Needy"
+}
