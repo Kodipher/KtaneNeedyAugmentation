@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using Rephidock.GeneralUtilities.Collections;
 using Rephidock.AtomicAnimations;
@@ -129,6 +130,12 @@ namespace NeedyAugmentationMod {
 		}
 
 		void OnNeedyActivation() {
+
+			if (isForceSolved) {
+				kmNeedyModule.HandlePass();
+				return;
+			}
+			
 			isNeedyRunning = true;
 			animationRunner.Run(DrainingBarInfiniteRoutine());
 		}
@@ -171,6 +178,33 @@ namespace NeedyAugmentationMod {
 
 		#endregion
 
+		#region /--- Twitch Plays --/
+
+		bool isForceSolved = false;
+		public readonly string TwitchHelpMessage = "Press the Refill button with \"!{0} refill\" or \"!{0} press refill\"";
+		
+		public void TwitchHandleForcedSolve() {
+			isForceSolved = true;
+
+			if (isNeedyRunning) {
+				float solveAtTime = kmNeedyModule.GetNeedyTimeRemaining();
+				kmNeedyModule.HandlePass();
+				OnNeedyDeactivation();
+				animationRunner.Run(PassRoutine(solveAtTime));
+			}
+	    }
+		
+		public IEnumerable<KMSelectable> ProcessTwitchCommand(string command) {
+			
+			if (Regex.IsMatch(command, @"^\s*(?:press\s)?\s*refill\s*", RegexOptions.IgnoreCase)) {
+				return refillButtonSelectable.Yield();
+			}
+
+			return null;
+		}
+
+		#endregion
+		
 		#region /--- Create Augmentations ---/
 
 		void HandleConfiguration() {
