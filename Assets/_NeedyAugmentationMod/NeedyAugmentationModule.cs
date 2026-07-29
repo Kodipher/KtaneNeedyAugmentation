@@ -367,7 +367,7 @@ namespace NeedyAugmentationMod {
 		
 		#region /--- Display Texts and Colors ---/
 
-		const string AugmentedText = "AUGMETNED";
+		const string AugmentedText = "AUGMENTED";
 		const string UnchangedText = "UNCHANGED";
 		const string NoConfigText = "NO CONFIG";
 		const string ModuleErrorText = "MODULEERR";
