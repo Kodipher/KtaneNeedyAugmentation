@@ -218,11 +218,14 @@ namespace NeedyAugmentationMod {
 		}
 
 		public void Update() {
-			
-			if (!TimerComponent.GetIsUpdating()) return;
 
-			float timerRate = Mathf.Abs(TimerComponent.GetRate());
-			TimeSpan deltaTime = TimeSpan.FromSeconds(Time.deltaTime * timerRate);
+			bool timerIsUpdating = TimerComponent.GetIsUpdating();
+			
+			TimeSpan deltaTime = TimeSpan.Zero;
+			if (timerIsUpdating) {
+				float timerRate = Mathf.Abs(TimerComponent.GetRate());
+				deltaTime = TimeSpan.FromSeconds(Time.deltaTime * timerRate);
+			}
 
 			modulesSolvedUpdatedThisFrame = false;
 			
@@ -290,6 +293,9 @@ namespace NeedyAugmentationMod {
 					goto case ActivatorState.WaitingForActivationInterruptable;
 				
 				case ActivatorState.WaitingForStartModules:
+
+					if (!timerIsUpdating) break; // also wait until the timer starts
+					
 					UpdateModulesSolvedAndActivationLimitOncePerFrame();
 					int threshold = Settings.StartThresholdModules ?? 0;
 					if (modulesSolved >= threshold) {
@@ -298,6 +304,8 @@ namespace NeedyAugmentationMod {
 					break;
 				
 				case ActivatorState.WaitingForStartTime:
+					
+					if (!timerIsUpdating) break; // also wait until the timer starts
 					
 					startDelayLeft -= deltaTime;
 					
@@ -309,6 +317,8 @@ namespace NeedyAugmentationMod {
 				
 				case ActivatorState.WaitingForActivationInterruptable:
 
+					if (!timerIsUpdating) break; // also wait until the timer starts
+					
 					initialActivationDelayLeft -= deltaTime;
 					if (initialActivationDelayLeft < TimeSpan.Zero) {
 						CurrentState = ActivatorState.NormalBehavior;
