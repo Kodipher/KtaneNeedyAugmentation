@@ -98,22 +98,22 @@ namespace NeedyAugmentationMod {
 			}
 
 			if (StopThresholdTime.HasValue) {
-				var formatPair = Pair.New("stop={0}s", new object[] { StopThresholdTime.Value.TotalSeconds });
+				var formatPair = Pair.New("stop={0}sl", new object[] { StopThresholdTime.Value.TotalSeconds });
 				properties.Add(formatPair);
 			}
 			
 			if (StopThresholdModules.HasValue) {
-				var formatPair = Pair.New("stop={0}m", new object[] { StopThresholdModules.Value });
+				var formatPair = Pair.New("stop={0}ml", new object[] { StopThresholdModules.Value });
 				properties.Add(formatPair);
 			}
 			
 			if (TerminationThresholdTime.HasValue) {
-				var formatPair = Pair.New("term={0}s", new object[] { TerminationThresholdTime.Value.TotalSeconds });
+				var formatPair = Pair.New("term={0}sl", new object[] { TerminationThresholdTime.Value.TotalSeconds });
 				properties.Add(formatPair);
 			}
 			
 			if (TerminationThresholdModules.HasValue) {
-				var formatPair = Pair.New("term={0}m", new object[] { TerminationThresholdModules.Value });
+				var formatPair = Pair.New("term={0}ml", new object[] { TerminationThresholdModules.Value });
 				properties.Add(formatPair);
 			}
 
