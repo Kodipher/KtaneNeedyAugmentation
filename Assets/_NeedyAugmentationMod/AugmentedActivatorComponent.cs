@@ -375,21 +375,8 @@ namespace NeedyAugmentationMod {
 			this.enabled = false; // prevent further Update calls; the component still exists
 		}
 		
-		/// <remarks>
-		/// When <paramref name="isInterrupted"/> is true,
-		/// the caller MUST activate the needy via StartRunning().
-		/// </remarks>
-		public void GuardInterruption(out bool isInterrupted) {
-			
-			if (CurrentState != ActivatorState.WaitingForActivationInterruptable) {
-				// Cannot interrupt
-				isInterrupted = false;	
-				return;
-			}
-				
-			// Interrupting...
-			CurrentState = ActivatorState.NormalBehavior;
-			isInterrupted = true;
+		public bool IsInInterruptableWaiting() {
+			return CurrentState == ActivatorState.WaitingForActivationInterruptable;
 		}
 
 		/// <remarks>

@@ -121,10 +121,7 @@ namespace NeedyAugmentationMod {
 					return true;
 				}
 
-				bool isActivating;
-				activator.GuardInterruption(out isActivating);
-
-				if (!isActivating) {
+				if (!activator.IsInInterruptableWaiting()) {
 					// Cannot interrupt
 					__result = Enumerable.Empty<object>().GetEnumerator();
 					return false;
@@ -177,7 +174,7 @@ namespace NeedyAugmentationMod {
 					new CodeInstruction(OpCodes.Ldloca_S, isActivatingLocal.LocalIndex),
 					CodeInstruction.Call(typeof(Patcher), nameof(ResetAndStartGuardInfix)),
 					
-					// if (isActivatingLocal) {
+					// if (isActivating) {
 					new CodeInstruction(OpCodes.Ldloc_0),
 					new CodeInstruction(OpCodes.Brfalse, skipCallLabel)
 				);
