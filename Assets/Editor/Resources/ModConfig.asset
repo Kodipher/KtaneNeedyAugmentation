@@ -19,10 +19,8 @@ MonoBehaviour:
     has to be configured through the mission description, otherwise it acts like Refill
     that Beer!.\nSee the manual for possible augmentations.\n\nModule ID: needyAugmentation\r\n\r\nManual
     HTML: [url=https://ktane.timwi.de/HTML/Needy%20Augmentation.html] > link < [/url]\r\nManual
-    PDF: [url=https://ktane.timwi.de/PDF/Needy%20Augmentation.pdf] > link < [/url]\r\n\nManual
-    PDF mirror: [url=https://github.com/Kodipher/KtaneNeedyAugmentation/blob/main/Manual/pdfs/NeedyModules/Needy%20Augmentation.pdf]
-    > link < [/url]\r\n"
-  version: 1.0.2
+    PDF: [url=https://ktane.timwi.de/PDF/Needy%20Augmentation.pdf] > link < [/url]\r\r\n"
+  version: 1.1
   outputFolder: build
   debugBuild: 1
   previewImage: {fileID: 2800000, guid: 391a11ba43f8deb44afb20fbd9dd867c, type: 3}
